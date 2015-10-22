@@ -3,6 +3,9 @@
 
 	class Sprite {
 		private $fileHandle;
+		private $_spritesCountSize = 2;
+
+		public $spritesCount;
 
 		public function __construct() {
 			if (CONFIG::$spriteFilePath === null) {
@@ -10,24 +13,32 @@
 			}
 
 			$this->fileHandle = new FileReader(CONFIG::$spriteFilePath);
+
+			$this->determineFileVersion();
+			$this->getFileMetadata();
+		}
+
+
+		private function getFileMetadata() {
+			$this->fileHandle->jump(0);
+			$this->fileSignature = $this->fileHandle->readInt32();
+			$this->spritesCount = $this->fileHandle->readBytes($this->_spritesCountSize);
 		}
 
 		// Check if file signature points at Tibia version 9.60 or later
 		// which contains 32-bytes long sprites count
-		private function isNewFileType() {
+		private function determineFileVersion() {
 			$versionSignature = $this->fileHandle->jump(0)->readInt32();
 
 			if ($versionSignature >= 1341814009) {
-				return true;
-			} else {
-				return false;
+				$this->_spritesCountSize = 4;
 			}
 		}
 		
 		//Returns start & end position of sprite content in file
 		private function getSpriteAddress($spriteId) {
 			//Skip file signature and sprites count
-			$firstSpriteAddressAt = ($this->isNewFileType()) ? 8 : 6;
+			$firstSpriteAddressAt = (4 + $this->_spritesCountSize);
 
 			$spriteAddressAt = $firstSpriteAddressAt + (($spriteId - 1) * 4);
 
@@ -46,7 +57,12 @@
 			return [$spriteBegin, $spriteEnd];
 		}
 
-		public function get($spriteId, $alphaChannel = false) {
+		public function getSprite($spriteId, $alphaChannel = false) {
+			//Check if sprite ID isn't bigger than sprites count
+			if ($spriteId > $this->spritesCount) {
+				throw new \Exception("Specified sprite ID (".$spriteId.") is bigger than sprites count (".$this->spritesCount.")!");
+			}
+
 			$spriteAdress = $this->getSpriteAddress($spriteId);
 			
 			//Jump to first pixel information (not sure why actually there is +5, because I wrote first version few years ago)
@@ -74,7 +90,7 @@
 			return $image;
 		}
 
-		public function printImage($spriteId, $alphaChannel = false) {
+		public function printSprite($spriteId, $alphaChannel = false) {
 			$image = $this->get($spriteId, $alphaChannel);
 
 			header("Content-type: image/png");
