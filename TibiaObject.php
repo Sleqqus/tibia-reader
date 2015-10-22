@@ -3,8 +3,14 @@
 
 	class Object {
 		private $fileHandle;
+		private $cachedFileMap;
 		private $fileMetadata = [];
-		private $objectData = [];
+		private $fileHash;
+
+		private $object = [];
+		private $objectId = null;
+		private $objectIndexInFile = null;
+		private $objectAddress = null;
 
 		private $_spriteIdSize = 2;
 		private $_animationPhases = false;
@@ -17,6 +23,7 @@
 		public $fileProjectiles;
 
 		public $filePhysicalItems;
+		public $objectsTotal;
 
 
 		public function __construct() {
@@ -37,6 +44,15 @@
 			$this->determineSpriteIdSize();
 			$this->determineAnimationPhases();
 			$this->determineFrameGroups();
+			
+			if (CONFIG::$dataFileMapping) {
+				//Create and save file map if caching is set to true and file isn't already mapped
+				if (!$this->isFileMapped()) {
+					$this->mapFile();
+				}
+
+				$this->cachedFileMap = file(CONFIG::$dataFileCacheDir . $this->fileHash);
+			}
 		}
 
 
@@ -76,20 +92,39 @@
 			$this->fileProjectiles   = $this->fileHandle->readInt16();
 
 			$this->filePhysicalItems = ($this->fileItems - 100);
+			$this->objectsTotal      = ($this->filePhysicalItems + $this->fileLooktypes + $this->fileEffects + $this->fileProjectiles);
+
+			$this->fileHash = md5_file(CONFIG::$dataFilePath);
+		}
+
+		private function getObjectTypeByIndex($objectId) {
+			if ($objectId <= $this->filePhysicalItems) {
+				return "item";
+			} elseif ($objectId <= ($this->filePhysicalItems + $this->fileLooktypes)) {
+				return "looktype";
+			} elseif ($objectId <= ($this->filePhysicalItems + $this->fileLooktypes + $this->fileEffects)) {
+				return "effect";
+			} else {
+				return "projectile";
+			}
 		}
 
 
-		private function readObjectFlags() {
-			$flagId = $this->fileHandle->readByte();
 
+		/* ---------------------------------------------------------------------------------------------------- */
+		/* ----- OBJECT READING BEGIN                                                                           */
+		/* ---------------------------------------------------------------------------------------------------- */
+
+		private function readObjectFlags() {
 			$objectFlags = [];
 
+			$flagId = $this->fileHandle->readByte();
 			while ($flagId !== 255) {
-				$flag = Flags::getFlag($this->fileSignature, $flagId);
+				$flagDefinition = Flags::getFlag($this->fileSignature, $flagId);
 
-				$objectFlags[$flagId] = [$flag[0]];
+				$objectFlags[$flagId] = [$flagDefinition[0]];
 
-				$flagParameters = $flag[1];
+				$flagParameters = $flagDefinition[1];
 				$flagParametersCount = count($flagParameters);
 
 				if ($flagParametersCount > 0) {
@@ -119,11 +154,10 @@
 			$group["width"]          = $this->fileHandle->readByte();
 			$group["height"]         = $this->fileHandle->readByte();
 
-			$group["_sprites4frame"] = ($group["width"] * $group["height"]);
-
-			if ($group["_sprites4frame"] > 1) {
+			if (($group["width"] * $group["height"]) > 1) {
 				$group["cropsize"]   = $this->fileHandle->readByte();
 			}
+
 			$group["layers"]         = $this->fileHandle->readByte();
 			$group["divx"]           = $this->fileHandle->readByte();
 			$group["divy"]           = $this->fileHandle->readByte();
@@ -157,91 +191,149 @@
 		}
 
 		private function readObject($objectIndex) {
+			$object = [];
 
-			if ($objectIndex <= $this->filePhysicalItems) {
-				$this->objectData["type"] = "item";
-			} elseif ($objectIndex <= ($this->filePhysicalItems+$this->fileLooktypes)) {
-				$this->objectData["type"] = "looktype";
-			} elseif ($objectIndex <= ($this->filePhysicalItems+$this->fileLooktypes+$this->fileEffects)) {
-				$this->objectData["type"] = "effect";
-			} else {
-				$this->objectData["type"] = "projectile";
-			}
+			$object["flags"] = $this->readObjectFlags();
+			$object["type"] = $this->getObjectTypeByIndex($objectIndex);
 
-			$this->objectData["flags"] = $this->readObjectFlags();
-
-			//Frame groups were implemented in version 10.57
 			if ($this->_frameGroups) {
-				if ($this->objectData["type"] === "looktype") {
-					$this->objectData["frameGroupsCount"] = $this->fileHandle->readByte();
+				if ($object["type"] === "looktype") {
+					$object["frameGroupsCount"] = $this->fileHandle->readByte();
 				} else {
-					$this->objectData["frameGroupsCount"] = 1;
+					$object["frameGroupsCount"] = 1;
 				}
 
-				$this->objectData["frameGroups"] = [];
+				$object["frameGroups"] = [];
 
-				for ($frameGroup = 0; $frameGroup < $this->objectData["frameGroupsCount"]; $frameGroup++) {
-					if ($this->objectData["type"] === "looktype") {
+				for ($frameGroup = 0; $frameGroup < $object["frameGroupsCount"]; $frameGroup++) {
+					if ($object["type"] === "looktype") {
 						$frameGroupIndex = $this->fileHandle->readByte();
 					}
 
-					$this->objectData["frameGroups"][] = $this->readObjectProperties();
+					$object["frameGroups"][] = $this->readObjectProperties();
 				}
-
 			} else {
-
 				$objectProperties = $this->readObjectProperties();
-				$this->objectData = array_merge($this->objectData, $objectProperties);
-
+				$object = array_merge($object, $objectProperties);
 			}
 
+			return $object;
 		}
 
-		public function mapFile($itemId) {
-			br(); print "mapping file";
-			br(); print_r($this->fileMetadata);
-			br();
+		/* ---------------------------------------------------------------------------------------------------- */
+		/* ----- OBJECT READING END                                                                             */
+		/* ---------------------------------------------------------------------------------------------------- */
 
-			$objectsTotal = ($this->filePhysicalItems + $this->fileLooktypes + $this->fileEffects + $this->fileProjectiles);
-			// $objectsTotal = 1000;
-			br(); print "total: ".$objectsTotal;
 
+
+		public function mapFile() {
+			$cacheFile = fopen(CONFIG::$dataFileCacheDir . $this->fileHash, "w");
 			
 			$this->fileHandle->jump(12);
-
 			
-			for ($objectIndex = 0; $objectIndex <= $objectsTotal; $objectIndex++) {
-				//Reset array (necessary if iterating through more than 1 object)
-				$this->objectData = [];
-				
-				$objectData = $this->readObject($objectIndex);
-				
-				$this->printObjectInformation($this->objectData, $objectIndex);
+			for ($objectIndex = 0; $objectIndex <= $this->objectsTotal; $objectIndex++) {
+				$obejctPosition = $this->fileHandle->getPos();
+				fwrite($cacheFile, ($obejctPosition."\n"));
+				$this->readObject($objectIndex);
 			}
+
+			fclose($cacheFile);
+		}
+
+		public function getObjectAddress($objectId) {
+			if (CONFIG::$dataFileMapping) {
+				return (int)$this->cachedFileMap[$objectId];
+			} else {
+				$this->fileHandle->jump(12);
+
+				for ($objectIndex = 0; $objectIndex < $objectId; $objectIndex++) {
+					$this->readObject($objectIndex);
+				}
+
+				return $this->fileHandle->getPos();
+			}
+			
 		}
 
 		private function isFileMapped() {
-			return false;
-		}
-
-		public function loadItem($itemId) {
-			if (!$this->isFileMapped()) {
-				$this->mapFile($itemId);
+			if (!file_exists(CONFIG::$dataFileCacheDir . $this->fileHash)) {
+				return false;
+			} else {
+				return true;
 			}
 		}
 
-		public function loadLooktype($looktypeId) {
+		private function getObject($objectIndex) {
+			$this->objectIndexInFile = $objectIndex;
 
+			$this->objectAddress = $this->getObjectAddress($objectIndex);
+			$this->fileHandle->jump($this->objectAddress);
+
+			$this->object = $this->readObject($objectIndex);
+
+			$this->printObjectInformation();
 		}
 
-		public function getInformation() {
+		private function getObjectIndex($id, $type) {
+			switch($type) {
+				case 0: $index = ($id-100); break;
+				case 1: $index = ($this->filePhysicalItems + $id); break;
+				case 2: $index = ($this->filePhysicalItems + $this->fileLooktypes + $id); break;
+				case 3: $index = ($this->filePhysicalItems + $this->fileLooktypes + $this->fileEffects + $id); break;
+			}
 
+			return $index;
 		}
 
-		public function printObjectInformation($object, $objectIndex) {
-				br(); print "--------------------------------------------------------------------------";
-				br(); print "object: ".$objectIndex;
+		public function getItem($itemId) {
+			if (($itemId < 100) || ($itemId > $this->fileItems)) {
+				throw new \Exception("Object ID out of file boundaries!");
+			}
 
-				br(); print_r($object);
+			$this->objectId = $itemId;
+
+			$objectId = $this->getObjectIndex($itemId, 0);
+			$this->getObject($objectId);
+		}
+
+		public function getLooktype($looktypeId) {
+			if (($looktypeId < 1) || ($looktypeId > $this->fileLooktypes)) {
+				throw new \Exception("Object ID out of file boundaries!");
+			}
+
+			$this->objectId = $looktypeId;
+
+			$objectId = $this->getObjectIndex($looktypeId, 1);
+			$this->getObject($objectId);
+		}
+
+		public function getEffect($effectId) {
+			if (($effectId < 1) || ($effectId > $this->fileEffects)) {
+				throw new \Exception("Object ID out of file boundaries!");
+			}
+
+			$this->objectId = $effectId;
+
+			$objectId = $this->getObjectIndex($effectId, 2);
+			$this->getObject($objectId);
+		}
+
+		public function getProjectile($projectileId) {
+			if (($projectileId < 1) || ($projectileId > $this->fileProjectiles)) {
+				throw new \Exception("Object ID out of file boundaries!");
+			}
+
+			$this->objectId = $projectileId;
+
+			$objectId = $this->getObjectIndex($projectileId, 3);
+			$this->getObject($objectId);
+		}
+
+
+		public function printObjectInformation() {
+			print "Object ID: ".$this->objectId." (file index: ".$this->objectIndexInFile.", starting at byte: ".$this->objectAddress.")";
+			print "<pre>";
+			print_r($this->object);
+			print "</pre>";
 		}
 	}

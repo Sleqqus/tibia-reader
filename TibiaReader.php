@@ -72,6 +72,9 @@
 		public static $dataFilePath = null;
 		public static $spriteFilePath = null;
 
+		public static $dataFileMapping = false;
+		public static $dataFileCacheDir = null;
+
 		public static function setSpriteFilePath($path) {
 			if (!is_file($path)) {
 				throw new \Exception("Specified data file does not exist.");
@@ -87,8 +90,14 @@
 
 			SELF::$dataFilePath = $path;
 		}
+
+		public static function setDataFileMapping($mapping) {
+			SELF::$dataFileMapping = $mapping;
+		}
 	}
 	
+	CONFIG::$dataFileCacheDir = dirname(__FILE__).DIRECTORY_SEPARATOR."cache".DIRECTORY_SEPARATOR;
+
 	if (!file_exists(dirname(__FILE__).DIRECTORY_SEPARATOR."cache")) {
 		mkdir(dirname(__FILE__).DIRECTORY_SEPARATOR."cache");
 	}
