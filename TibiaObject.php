@@ -26,11 +26,13 @@
 
 			$this->fileHandle = new FileReader(CONFIG::$dataFilePath);
 
-			$this->getFileMetadata();
+			$this->getFileSignature();
 
 			if (!Flags::isSupported($this->fileSignature)) {
 				throw new \Exception("Specified data file is not supported!");
 			}
+
+			$this->getFileMetadata();
 
 			$this->determineSpriteIdSize();
 			$this->determineAnimationPhases();
@@ -60,17 +62,22 @@
 			}
 		}
 
+
+		private function getFileSignature() {
+			$this->fileHandle->jump(0);
+			$this->fileSignature = $this->fileHandle->readInt32();
+		}
  
 		private function getFileMetadata() {
-			$this->fileHandle->jump(0);
-			$this->fileSignature       = $this->fileHandle->readInt32();
-			$this->fileItems           = $this->fileHandle->readInt16();
-			$this->fileLooktypes       = $this->fileHandle->readInt16();
-			$this->fileEffects         = $this->fileHandle->readInt16();
-			$this->fileProjectiles     = $this->fileHandle->readInt16();
+			$this->fileHandle->jump(4);
+			$this->fileItems         = $this->fileHandle->readInt16();
+			$this->fileLooktypes     = $this->fileHandle->readInt16();
+			$this->fileEffects       = $this->fileHandle->readInt16();
+			$this->fileProjectiles   = $this->fileHandle->readInt16();
 
-			$this->filePhysicalItems   = ($this->fileItems-100);
+			$this->filePhysicalItems = ($this->fileItems - 100);
 		}
+
 
 		private function readObjectFlags() {
 			$flagId = $this->fileHandle->readByte();
@@ -80,26 +87,21 @@
 			while ($flagId !== 255) {
 				$flag = Flags::getFlag($this->fileSignature, $flagId);
 
-				if($flag[0] == "market") {
-					$this->objectData["market_category"]   = $this->fileHandle->readInt16();
-					$this->objectData["market_trade_as"]   = $this->fileHandle->readInt16();
-					$this->objectData["market_showas"]     = $this->fileHandle->readInt16();
-
-					$nameLength = $this->fileHandle->readInt16();
-					$this->objectData["market_name"]       = $this->fileHandle->readText($nameLength);
-
-					$this->objectData["market_proffesion"] = $this->fileHandle->readInt16();
-					$this->objectData["market_level"]      = $this->fileHandle->readInt16();
-				}
-
 				$objectFlags[$flagId] = [$flag[0]];
 
-				$flagParameters = count($flag[1]);
-				if ($flagParameters > 0) {
+				$flagParameters = $flag[1];
+				$flagParametersCount = count($flagParameters);
+
+				if ($flagParametersCount > 0) {
 					$flagParams = [];
-					for ($parameter = 0; $parameter < $flagParameters; $parameter++) {
-						$parameterValue = $this->fileHandle->readBytes($flag[1][$parameter][1]);
-						$flagParams[$flag[1][$parameter][0]] = $parameterValue;
+					for ($parameter = 0; $parameter < $flagParametersCount; $parameter++) {
+						$parameterValue = $this->fileHandle->readBytes($flagParameters[$parameter][1]);
+
+						if (isset($flagParameters[$parameter][2])) {
+							$flagParams[$flagParameters[$parameter][0]] = $this->fileHandle->readText($parameterValue);
+						} else {
+							$flagParams[$flagParameters[$parameter][0]] = $parameterValue;
+						}
 					}
 					$objectFlags[$flagId][1] = $flagParams;
 				}
@@ -109,7 +111,6 @@
 			}
 
 			return $objectFlags;
-
 		}
 
 		private function readObjectProperties() {
@@ -242,6 +243,5 @@
 				br(); print "object: ".$objectIndex;
 
 				br(); print_r($object);
-
 		}
 	}
