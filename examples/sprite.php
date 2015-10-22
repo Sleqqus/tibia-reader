@@ -6,5 +6,5 @@
 	$spriteId = intval($_GET['id']);
 	
 	$sprite = new TibiaReader\Sprite();
-	$sprite->printImage($spriteId, false);
+	$sprite->printSprite($spriteId, false);
 ?>

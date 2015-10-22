@@ -91,7 +91,7 @@
 		}
 
 		public function printSprite($spriteId, $alphaChannel = false) {
-			$image = $this->get($spriteId, $alphaChannel);
+			$image = $this->getSprite($spriteId, $alphaChannel);
 
 			header("Content-type: image/png");
 			Imagepng($image);
