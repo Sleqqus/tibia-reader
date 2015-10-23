@@ -2,8 +2,8 @@
 	require('../TibiaReader.php');
 
 
-	TibiaReader\CONFIG::setDataFilePath("resources/1084tibia.dat");
-	// TibiaReader\CONFIG::setSpriteFilePath("resources/1084tibia.spr");
+	TibiaReader\CONFIG::setDataFilePath("resources/1084Tibia.dat");
+	// TibiaReader\CONFIG::setSpriteFilePath("resources/1084Tibia.spr");
 
 	TibiaReader\CONFIG::setDataFileMapping(true);
 

@@ -1,16 +1,16 @@
 <?php
 	require('../TibiaReader.php');
 
-	// TibiaReader\CONFIG::setDataFilePath("resources/760tibia.dat");
-	// TibiaReader\CONFIG::setDataFilePath("resources/980tibia.dat");
-	// TibiaReader\CONFIG::setDataFilePath("resources/1050tibia.dat");
-	// TibiaReader\CONFIG::setDataFilePath("resources/1057tibia.dat");
-	// TibiaReader\CONFIG::setDataFilePath("resources/1070tibia.dat");
-	// TibiaReader\CONFIG::setDataFilePath("resources/1072tibia.dat");
-	// TibiaReader\CONFIG::setDataFilePath("resources/1075tibia.dat");
-	TibiaReader\CONFIG::setDataFilePath("resources/1084tibia.dat");
+	// TibiaReader\CONFIG::setDataFilePath("resources/760Tibia.dat");
+	// TibiaReader\CONFIG::setDataFilePath("resources/980Tibia.dat");
+	// TibiaReader\CONFIG::setDataFilePath("resources/1050Tibia.dat");
+	// TibiaReader\CONFIG::setDataFilePath("resources/1057Tibia.dat");
+	// TibiaReader\CONFIG::setDataFilePath("resources/1070Tibia.dat");
+	// TibiaReader\CONFIG::setDataFilePath("resources/1072Tibia.dat");
+	// TibiaReader\CONFIG::setDataFilePath("resources/1075Tibia.dat");
+	TibiaReader\CONFIG::setDataFilePath("resources/1084Tibia.dat");
 
-	TibiaReader\CONFIG::setSpriteFilePath("resources/1084tibia.spr");
+	TibiaReader\CONFIG::setSpriteFilePath("resources/1084Tibia.spr");
 
 	TibiaReader\CONFIG::setDataFileMapping(true);
 ?>
