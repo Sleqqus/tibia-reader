@@ -105,3 +105,4 @@
 	require(dirname(__FILE__).DIRECTORY_SEPARATOR."TibiaSprite.php");
 	require(dirname(__FILE__).DIRECTORY_SEPARATOR."TibiaObject.php");
 	require(dirname(__FILE__).DIRECTORY_SEPARATOR."flags.php");
+	require(dirname(__FILE__).DIRECTORY_SEPARATOR."TibiaLooktype.php");

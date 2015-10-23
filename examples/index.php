@@ -13,19 +13,27 @@
 	TibiaReader\CONFIG::setSpriteFilePath("resources/1084Tibia.spr");
 
 	TibiaReader\CONFIG::setDataFileMapping(true);
+
 ?>
 
-	<h2>TibiaReader demos</h2>
-
+	<!-- <h2>TibiaReader demos</h2>
 	<a href="object_explorer.php">Object Explorer</a> | <a href="sprite_browser.php">Sprite Browser</a> | <a href="sprite.php?id=1">Show single sprite</a> <br/>
-	<br/>
-
+	<br/> -->
 <?php
-	$object = new TibiaReader\Object();
-	$object->printFileInformation();
-?>
-<br>
-<?php
-	$object = new TibiaReader\Sprite();
-	$object->printFileInformation();
+	// $object = new TibiaReader\Object();
+	// $object->printFileInformation();
+	// print "<br>";
+	// $object = new TibiaReader\Sprite();
+	// $object->printFileInformation();
+	
+	
+	$outfit = new TibiaReader\Looktype();
+	$outfit->setLooktype(128);
+	$outfit->setColors(78, 69, 58, 76);
+	$outfit->setAddons(0);
+	$outfit->setMount(12)->setColors(123, 123, 123, 123);
+	
+	
+	
+	
 ?>
