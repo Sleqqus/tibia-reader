@@ -7,8 +7,8 @@
 		private $fileMetadata = [];
 		private $fileHash;
 
-		private $object = [];
-		private $objectId = null;
+		public $object = [];
+		public $objectId = null;
 		private $objectIndexInFile = null;
 		private $objectAddress = null;
 
@@ -270,8 +270,6 @@
 			$this->fileHandle->jump($this->objectAddress);
 
 			$this->object = $this->readObject($objectIndex);
-
-			$this->printObjectInformation();
 		}
 
 		private function getObjectIndex($id, $type) {
@@ -335,5 +333,14 @@
 			print "<pre>";
 			print_r($this->object);
 			print "</pre>";
+		}
+
+		public function printFileInformation() {
+			print "Data file name: " . basename(CONFIG::$dataFilePath) . "<br>";
+			print "File Signature: " . $this->fileSignature . "<br>";
+			print "Items: " . $this->fileItems . "<br>";
+			print "Looktypes: " . $this->fileLooktypes . "<br>";
+			print "Effects: " . $this->fileEffects . "<br>";
+			print "Projectiles: " . $this->fileProjectiles . "<br>";
 		}
 	}

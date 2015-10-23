@@ -58,6 +58,12 @@
 		}
 
 		public function getSprite($spriteId, $alphaChannel = false) {
+			$spriteId = (int)$spriteId;
+
+			if ($spriteId === 0) {
+				$spriteId = 1;
+			}
+
 			//Check if sprite ID isn't bigger than sprites count
 			if ($spriteId > $this->spritesCount) {
 				throw new \Exception("Specified sprite ID (".$spriteId.") is bigger than sprites count (".$this->spritesCount.")!");
@@ -95,5 +101,10 @@
 
 			header("Content-type: image/png");
 			Imagepng($image);
+		}
+
+		public function printFileInformation() {
+			print "Data file name: " . basename(CONFIG::$spriteFilePath) . "<br>";
+			print "Sprites: " . $this->spritesCount . "<br>";
 		}
 	}
