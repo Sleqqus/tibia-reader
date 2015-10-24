@@ -80,7 +80,7 @@
 				throw new \Exception("Specified data file does not exist.");
 			}
 
-			SELF::$spriteFilePath = $path;
+			self::$spriteFilePath = $path;
 		}
 
 		public static function setDataFilePath($path) {
@@ -88,11 +88,11 @@
 				throw new \Exception("Specified sprite file does not exist.");
 			}
 
-			SELF::$dataFilePath = $path;
+			self::$dataFilePath = $path;
 		}
 
 		public static function setDataFileMapping($mapping) {
-			SELF::$dataFileMapping = $mapping;
+			self::$dataFileMapping = $mapping;
 		}
 	}
 	

@@ -70,13 +70,13 @@
 		];
 
 		public static function getFlag($fileSignature, $flag) {
-			$flagIndex = SELF::$dataVersions[$fileSignature][$flag];
-			$selectedFlag = SELF::$knownFlags[$flagIndex];
+			$flagIndex = self::$dataVersions[$fileSignature][$flag];
+			$selectedFlag = self::$knownFlags[$flagIndex];
 			return $selectedFlag;
 		}
 
 		public static function isSupported($fileSignature) {
-			if (isset(SELF::$dataVersions[$fileSignature])) {
+			if (isset(self::$dataVersions[$fileSignature])) {
 				return true;
 			} else {
 				return false;
