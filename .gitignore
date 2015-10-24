@@ -1,2 +1,3 @@
 examples/resources/*
 cache/*
+sftp-config.json
