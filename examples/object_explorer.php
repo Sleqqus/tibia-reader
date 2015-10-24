@@ -2,10 +2,11 @@
 	require('../TibiaReader.php');
 
 
+	// TibiaReader\CONFIG::setDataFilePath("resources/760Tibia.dat");
 	TibiaReader\CONFIG::setDataFilePath("resources/1084Tibia.dat");
 	// TibiaReader\CONFIG::setSpriteFilePath("resources/1084Tibia.spr");
 
-	TibiaReader\CONFIG::setDataFileMapping(true);
+	TibiaReader\CONFIG::setDataCaching(true);
 
 
 	$object = new TibiaReader\Object();
@@ -112,7 +113,7 @@
 			} else {
 				print '<div class="frameGroup">';
 				print '<div class="spritesContainer">';
-				foreach ($object->object["spriteId"] as $index => $id) {
+				foreach ($object->object["spriteIds"] as $index => $id) {
 					print '<img src="sprite.php?id='.$id.'">';
 					if (($index+1) % 16 == 0) {
 						print '<div style="clear: left"></div>';

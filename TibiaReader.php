@@ -71,9 +71,17 @@
 	class CONFIG {
 		public static $dataFilePath = null;
 		public static $spriteFilePath = null;
+		public static $mainCacheDir = null;
 
 		public static $dataFileMapping = false;
 		public static $dataFileCacheDir = null;
+
+		public static $looktypeCaching = false;
+		public static $looktypeCacheDir = null;
+		public static $looktypeMinImgSize = 64;
+
+		// public static $spriteCaching = false;
+		// public static $spriteCacheDir = null;
 
 		public static function setSpriteFilePath($path) {
 			if (!is_file($path)) {
@@ -91,16 +99,43 @@
 			self::$dataFilePath = $path;
 		}
 
-		public static function setDataFileMapping($mapping) {
+		public static function setDataCaching($mapping) {
 			self::$dataFileMapping = $mapping;
 		}
+
+
+		public static function setLooktypeCaching($looktypeCaching) {
+			self::$looktypeCaching = $looktypeCaching;
+		}
+
+		public static function setMinLooktypeImgSize($size) {
+			$allowedSizes = [false, 32, 64, 96, 128];
+			if (!in_array($size, $allowedSizes, true)) {
+				throw new \Exception("Not allowed image size specified!");
+			}
+			self::$looktypeMinImgSize = $size;
+		}
+
+		// public static function setSpriteCaching($spriteCaching) {
+			// self::$spriteCaching = $spriteCaching;
+		// }
 	}
 	
-	CONFIG::$dataFileCacheDir = dirname(__FILE__).DIRECTORY_SEPARATOR."cache".DIRECTORY_SEPARATOR;
+	CONFIG::$mainCacheDir     = dirname(__FILE__).DIRECTORY_SEPARATOR."cache".DIRECTORY_SEPARATOR;
+	CONFIG::$dataFileCacheDir = CONFIG::$mainCacheDir."data".DIRECTORY_SEPARATOR;
+	CONFIG::$looktypeCacheDir = CONFIG::$mainCacheDir."looktype".DIRECTORY_SEPARATOR;
+	// CONFIG::$spriteCacheDir = CONFIG::$mainCacheDir."spries".DIRECTORY_SEPARATOR;
 
-	if (!file_exists(dirname(__FILE__).DIRECTORY_SEPARATOR."cache")) {
-		mkdir(dirname(__FILE__).DIRECTORY_SEPARATOR."cache");
+	if (!file_exists(CONFIG::$mainCacheDir)) {
+		mkdir(CONFIG::$mainCacheDir);
 	}
+	if (!file_exists(CONFIG::$dataFileCacheDir)) {
+		mkdir(CONFIG::$dataFileCacheDir);
+	}
+	if (!file_exists(CONFIG::$looktypeCacheDir)) {
+		mkdir(CONFIG::$looktypeCacheDir);
+	}
+
 
 	require(dirname(__FILE__).DIRECTORY_SEPARATOR."TibiaSprite.php");
 	require(dirname(__FILE__).DIRECTORY_SEPARATOR."TibiaObject.php");
