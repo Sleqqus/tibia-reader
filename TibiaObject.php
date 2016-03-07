@@ -44,7 +44,7 @@
 			$this->determineSpriteIdSize();
 			$this->determineAnimationPhases();
 			$this->determineFrameGroups();
-			
+
 			if (CONFIG::$dataFileMapping) {
 				//Create and save file map if caching is set to true and file isn't already mapped
 				if (!$this->isFileMapped()) {
@@ -83,7 +83,7 @@
 			$this->fileHandle->jump(0);
 			$this->fileSignature = $this->fileHandle->readInt32();
 		}
- 
+
 		private function getFileMetadata() {
 			$this->fileHandle->jump(4);
 			$this->fileItems         = $this->fileHandle->readInt16();
@@ -170,7 +170,7 @@
 				$group["animation_type"]       = $this->fileHandle->readByte();
 				$group["animation_loopCount"]  = $this->fileHandle->readInt32();
 				$group["animation_startPhase"] = $this->fileHandle->readByte();
-				$group["animation_durations"]  = [];	
+				$group["animation_durations"]  = [];
 
 				for ($phase = 0; $phase < $group["animations"]; $phase++) {
 					$group["animation_durations"][$phase] = [
@@ -183,11 +183,11 @@
 			$group["sprites"] = $group["width"] * $group["height"] * $group["layers"] * $group["divx"] * $group["divy"] * $group["divz"] * $group["animations"];
 
 			$group["spriteIds"] = [];
-			for ($sprite = 0; $sprite < $group["sprites"]; $sprite++) { 
+			for ($sprite = 0; $sprite < $group["sprites"]; $sprite++) {
 				$group["spriteIds"][] = $this->fileHandle->readBytes($this->_spriteIdSize);
 			}
 
-			return $group;		
+			return $group;
 		}
 
 		private function readObject($objectIndex) {
@@ -228,9 +228,9 @@
 
 		public function mapFile() {
 			$cacheFile = fopen(CONFIG::$dataFileCacheDir . $this->fileHash, "w");
-			
+
 			$this->fileHandle->jump(12);
-			
+
 			for ($objectIndex = 0; $objectIndex <= $this->objectsTotal; $objectIndex++) {
 				$obejctPosition = $this->fileHandle->getPos();
 				fwrite($cacheFile, ($obejctPosition."\n"));
@@ -252,7 +252,7 @@
 
 				return $this->fileHandle->getPos();
 			}
-			
+
 		}
 
 		private function isFileMapped() {

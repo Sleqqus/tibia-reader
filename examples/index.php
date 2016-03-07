@@ -34,16 +34,29 @@
 	// print "<br>";
 	// $object = new TibiaReader\Sprite();
 	// $object->printFileInformation();
-	
-	
-	$outfit = new TibiaReader\Looktype(17);
+
+
+	$outfit = new TibiaReader\Looktype(128);
+	// $outfit = new TibiaReader\Looktype(17);
 	// $outfit->setLooktype(128);
-	$outfit->setColors(78, 69, 58, 76);
+
+	// $outfit->setColors(78, 69, 58, 76);
+	$outfit->setColors(0, 69, 0, 76);
+
 	$outfit->setAddons(1);
 	$outfit->setMount(12)->setColors(123, 123, 123, 123);
-	
-	$frame = $outfit->setDirection(0)->setFrame(1)->getFrame();
 
-	
-	
+
+	$image = $outfit->setDirection(1)->setStep(1)->getFrame();
+
+
+	header("Content-type: image/png");
+	Imagepng($image);
+
+
+
+	// $frame = $outfit->setDirection(0)->setFrame(1)->getFrame();
+
+
+
 ?>
