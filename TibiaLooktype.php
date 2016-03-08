@@ -7,20 +7,30 @@
     define("COLOR_GREEN",  65280);
     define("COLOR_BLUE",   255);
 
+	define("ADDON_NONE",    0);
+	define("ADDON_FIRST",   1);
+	define("ADDON_SECOND",  2);
+	define("ADDON_BOTH",    3);
+
+	define("LOOKTYPE_MOUNTED",   1);
+	define("LOOKTYPE_UNMOUNTED", 0);
+
 	class Looktype {
 
 		private $objectInstance;
 		private $mountObjectInstance = null;
 
-		private $looktypeColors = [];
+		private $looktypeColors = [0, 0, 0, 0];
 		private $looktypeAddons = 0;
+		private $looktypeMounted = 0;
 
-		private $looktypeDirection = 0;
-		private $looktypeMove = false;
+		private $looktypeDirection = 2;
+		// private $looktypeMove = false;
 		private $looktypeStep = 0;
 
 
 
+		// STATIC PART
 		static protected $colors = array(
 			0xFFFFFF, 0xFFD4BF, 0xFFE9BF, 0xFFFFBF, 0xE9FFBF, 0xD4FFBF, 0xBFFFBF, 0xBFFFD4, 0xBFFFE9, 0xBFFFFF, 0xBFE9FF, 0xBFD4FF, 0xBFBFFF, 0xD4BFFF, 0xE9BFFF, 0xFFBFFF,
 			0xFFBFE9, 0xFFBFD4, 0xFFBFBF, 0xDADADA, 0xBF9F8F, 0xBFAF8F, 0xBFBF8F, 0xAFBF8F,	0x9FBF8F, 0x8FBF8F, 0x8FBF9F, 0x8FBFAF, 0x8FBFBF, 0x8FAFBF, 0x8F9FBF, 0x8F8FBF,
@@ -34,162 +44,34 @@
 		);
 
 
-		public function __construct($looktypeId) {
-			$this->setLooktype($looktypeId);
-			// return null;
-		}
-
-		private function generateLayer() {
-
-		}
-
-		private function hasLayers() {
-			$frameGroups = isset($this->objectInstance->object["frameGroups"]);
+		private static function getDefaultFramegroup($looktypeObject) {
+			$frameGroups = isset($looktypeObject["frameGroups"]);
 			if ($frameGroups) {
-				$frameGroup = $this->objectInstance->object["frameGroups"][0];
+				return $looktypeObject["frameGroups"][0];
 			} else {
-				$frameGroup = $this->objectInstance->object;
+				return $looktypeObject;
 			}
-
-			return ($frameGroup["layers"] > 1)? true : false;
 		}
 
+		private static function looktypeHasLayers($looktypeObject) {
+			$frameGroup = SELF::getDefaultFramegroup($looktypeObject);
+			return ($frameGroup["layers"] > 1);
+		}
 
-		private function generateFrame($layer = 0, $direction = 0, $addon = 0, $mount = 0, $inMove = 0, $step = 0) {
-		// private function generateFrame($layer = 0, $direction = 2, $addon = 0, $mount = 0, $inMove = false, $step = 1) {
-			$looktype = $this->objectInstance->object;
+		private static function looktypeHasAddons($looktypeObject) {
+			$frameGroup = SELF::getDefaultFramegroup($looktypeObject);
+			return ($frameGroup["divy"] > 1);
+		}
 
-			$frameGroups = isset($this->objectInstance->object["frameGroups"]);
-
-			if ($frameGroups) {
-				$multipleFrameGroups = count($this->objectInstance->object["frameGroups"]) > 1;
-
-				if ($multipleFrameGroups) {
-					$targetFrameGroup = ($step === 0) ? 0 : 1;
-				} else {
-					$targetFrameGroup = 0;
-				}
-
-				$targetStep = ($step === 0) ? 0 : ($step - 1);
-				$frameGroup = $looktype["frameGroups"][$targetFrameGroup];
-			} else {
-				$targetStep = $step;
-				$frameGroup = $looktype;
-			}
-
-			//METADATA
-			$frameWidth = $frameGroup["width"];
-			$frameHeight = $frameGroup["width"];
-
-
-			//calc positions in frames map
-			$spritesPerLayer     = ($frameGroup["width"] * $frameGroup["height"]);
-			$spritesPerDirection = ($spritesPerLayer     * $frameGroup["layers"]);
-			$spritesPerAddon     = ($spritesPerDirection * $frameGroup["divx"]);
-			$spritesPerMount     = ($spritesPerAddon     * $frameGroup["divy"]);
-			$spritesPerStep      = ($spritesPerMount     * $frameGroup["divz"]);
-
-			//aim position
-			$index  = ($spritesPerLayer     * $layer);
-			$index += ($spritesPerDirection * $direction);
-			$index += ($spritesPerMount     * $mount);
-			$index += ($spritesPerAddon     * $addon);
-			$index += ($spritesPerStep      * $targetStep);
-
-
-			//print "<br> res: ".$spritesPerResolution;
-			// print "<br> lay: ".$spritesPerLayer;
-			// print "<br> dir: ".$spritesPerDirection;
-			// print "<br> add: ".$spritesPerAddon;
-			// print "<br> mou: ".$spritesPerMount;
-			// print "<br> ste: ".$spritesPerStep;
-			// print "<br>";
-			// print "<br> index: ".$index;
-			// print "<br><br>";
-
-			$targetFrameSet = array_slice($frameGroup["spriteIds"], $index, $spritesPerLayer);
-
-
-
-			$frame = imagecreatetruecolor($frameWidth*32, $frameHeight*32);
-			imagefill($frame, 0, 0, imagecolorallocate($frame, 255, 0, 255)); // <-----------
-
-
-
-			$sprite = new Sprite();
-
-			// $frameIndex = 0;
-			// for ($y = $frameHeight; $y > 0; $y--) {
-			// 	for ($x = $frameWidth; $x > 0; $x--) {
-			// 		$targetX = ($x-1)*32;
-			// 		$targetY = ($y-1)*32;
-			//
-			// 		$currentSprite = $sprite->getSprite($targetFrameSet[$frameIndex]);
-			// 		imagecopymerge($frame, $currentSprite, $targetX, $targetY, 0, 0, 32, 32, 100);
-			//
-			// 		$frameIndex++;
-			// 	}
-			// }
-
-			foreach ($targetFrameSet as $key => $spriteId) {
-            	$destinationX = ($frameWidth - (int)($key%$frameWidth)-1 ) *32;
-            	$destinationY = ($frameHeight - (int)($key/$frameHeight)-1 ) *32;
-
-				$currentSprite = $sprite->getSprite($targetFrameSet[$key]);
-
-            	imagecopymerge($frame, $currentSprite, $destinationX, $destinationY, 0, 0, 32, 32, 100);
-            }
-
-
-
-
-			return $frame;
-
-			// foreach ($targetFrameSet as $value) {
-				// print '<img src="sprite.php?id='.$value.'">';
-			// }
+		private static function looktypeHasMount($looktypeObject) {
+			$frameGroup = SELF::getDefaultFramegroup($looktypeObject);
+			return ($frameGroup["divz"] > 1);
 		}
 
 
 
 
-		private function setLooktype($looktypeId) {
-			$this->objectInstance = new Object();
-			$this->objectInstance->getLooktype($looktypeId);
-			return $this;
-		}
-
-		public function setColors($head, $body, $legs, $feet) {
-			$this->looktypeColors = [$head, $body, $legs, $feet];
-			return $this;
-		}
-
-		public function setAddons($addons) {
-			$this->looktypeAddons = $addons;
-			return $this;
-		}
-
-		public function setMount($mountId) {
-			$this->mountObjectInstance = new Looktype($mountId);
-			// $this->mountObjectInstance->setLooktype($mountId);
-			return $this->mountObjectInstance;
-		}
-
-		public function setStep($step) {
-			$this->looktypeStep = $step;
-			return $this;
-		}
-
-		public function setDirection($direction) {
-			$this->looktypeDirection = $direction;
-			return $this;
-		}
-
-
-
-
-
-		protected function getColorByPart($maskColor, $bodypartColors) {
+		protected static function getColorByPart($maskColor, $bodypartColors) {
 			switch($maskColor) {
 				case COLOR_RED:    return $bodypartColors[0];
 				case COLOR_YELLOW: return $bodypartColors[1];
@@ -200,6 +82,30 @@
 		}
 
 
+		/*
+		 *  Creates blank (pink) image. $width and $height in sprites (1 = 32px)
+		 */
+		static protected function createBlankImage($width = 1, $height = 1) {
+			$frame = imagecreatetruecolor($width*32, $height*32);
+			imagefill($frame, 0, 0, imagecolorallocate($frame, 255, 0, 255));
+			return $frame;
+		}
+
+
+		static protected function copyImageToPosition(&$target, $source, $targetX, $targetY, $transparent = false) {
+			if ($transparent) {
+				imagecolortransparent($source, ((255 << 16) + (0 << 8) + (255)));
+			}
+			imagecopymerge($target, $source, $targetX, $targetY, 0, 0, imagesx($source), imagesy($source), 100);
+		}
+
+		static protected function copySpriteToPosition(&$target, $source, $targetX, $targetY, $transparent = false) {
+			SELF::copyImageToPosition($target, $source, ($targetX-1)*32, ($targetY-1)*32, $transparent);
+		}
+
+		static protected function copyImage(&$target, $source, $transparent = false) {
+			SELF::copyImageToPosition($target, $source, 0, 0, $transparent);
+		}
 
 
 		static protected function toRGB($color) {
@@ -254,21 +160,201 @@
 
 
 
+		static private function generateFrameLayer($looktypeObject, $layer = 0, $direction = 0, $addon = 0, $mounted = 0, $inMove = 0, $step = 0) {
 
-		public function getFrame() {
-			//  $layer, $direction, $addon, $mount, $inMove, $step
+			// Get target frameGroup (if any) and step value
+			$frameGroups = isset($looktypeObject["frameGroups"]);
 
+			if ($frameGroups) {
+				$multipleFrameGroups = count($looktypeObject["frameGroups"]) > 1;
 
-			$targetImage = $this->generateFrame(0, $this->looktypeDirection, 0, 0, false, $this->looktypeStep);
+				if ($multipleFrameGroups) {
+					$targetFrameGroup = ($step === 0) ? 0 : 1;
+				} else {
+					$targetFrameGroup = 0;
+				}
 
-            if ($this->hasLayers()) {
-				$colorMask = $this->generateFrame(1, $this->looktypeDirection, 0, 0, false, $this->looktypeStep);
-                SELF::colorize($targetImage, $colorMask, $this->looktypeColors);
+				$targetStep = ($step === 0) ? 0 : ($step - 1);
+				$frameGroup = $looktypeObject["frameGroups"][$targetFrameGroup];
+			} else {
+				$targetStep = $step;
+				$frameGroup = $looktypeObject;
 			}
 
-			
+
+			// Calculate parts of frame set
+			$spritesPerLayer     = ($frameGroup["width"] * $frameGroup["height"]);
+			$spritesPerDirection = ($spritesPerLayer     * $frameGroup["layers"]);
+			$spritesPerAddon     = ($spritesPerDirection * $frameGroup["divx"]);
+			$spritesPerMount     = ($spritesPerAddon     * $frameGroup["divy"]);
+			$spritesPerStep      = ($spritesPerMount     * $frameGroup["divz"]);
+
+
+			// Calculate position in frame set
+			$index  = ($spritesPerLayer     * $layer);
+			$index += ($spritesPerDirection * $direction);
+			$index += ($spritesPerMount     * $mounted);
+			$index += ($spritesPerAddon     * $addon);
+			$index += ($spritesPerStep      * $targetStep);
+
+
+			// Merge sprites to flat image
+			$frameSet = array_slice($frameGroup["spriteIds"], $index, $spritesPerLayer);
+
+			$frame = SELF::createBlankImage($frameGroup["width"], $frameGroup["height"]);
+			$sprite = new Sprite();
+
+			for ($y = $frameGroup["height"]; $y > 0; $y--) {
+				for ($x = $frameGroup["width"]; $x > 0; $x--) {
+
+					$currentSprite = $sprite->getSprite( array_shift($frameSet) );
+					SELF::copySpriteToPosition($frame, $currentSprite, $x, $y);
+				}
+			}
+
+			return $frame;
+		}
+
+
+		/*
+		 * return colorized outfit frame with (?)addons (if looktype hasn't mask layer, raw colors will remain)
+		 */
+		 private static function getColorizedOutfitFrameWithAddons($looktypeObject, $colors, $direction, $addons, $mounted = 0, /* $inMove,*/ $step) {
+			//VERIFY HERE IF LOOKTYPE HAS MOUNT
+			if ($mounted && !SELF::looktypeHasMount($looktypeObject)) {
+				$mounted = 0;
+			}
+
+ 			$targetImage = SELF::generateFrameLayer($looktypeObject, 0, $direction, ADDON_NONE, $mounted, false, $step);
+
+ 			$hasColorLayer = SELF::looktypeHasLayers($looktypeObject);
+ 			if ($hasColorLayer) {
+ 				$colorMask = SELF::generateFrameLayer($looktypeObject, 1, $direction, ADDON_NONE, $mounted, false, $step);
+ 			}
+
+ 			if ($addons && SELF::looktypeHasAddons($looktypeObject)) {
+ 				if ($addons === 1 || $addons === 3) {
+ 					$addonImage = SELF::generateFrameLayer($looktypeObject, 0, $direction, ADDON_FIRST, $mounted, false, $step);
+ 					self::copyImage($targetImage, $addonImage, true);
+
+ 					if ($hasColorLayer) {
+ 						$addonImageColorMask = SELF::generateFrameLayer($looktypeObject, 1, $direction, ADDON_FIRST, $mounted, false, $step);
+ 						self::copyImage($colorMask, $addonImageColorMask, true);
+ 					}
+ 				}
+
+ 				if ($addons === 2 || $addons === 3) {
+ 					$addonImage = SELF::generateFrameLayer($looktypeObject, 0, $direction, ADDON_SECOND, $mounted, false, $step);
+ 					self::copyImage($targetImage, $addonImage, true);
+
+
+ 					if ($hasColorLayer) {
+ 						$addonImageColorMask = SELF::generateFrameLayer($looktypeObject, 1, $direction, ADDON_SECOND, $mounted, false, $step);
+ 						self::copyImage($colorMask, $addonImageColorMask, true);
+ 					}
+ 				}
+ 			}
+
+ 			if ($hasColorLayer) {
+ 				SELF::colorize($targetImage, $colorMask, $colors);
+ 			}
+
+ 			return $targetImage;
+ 		}
+
+
+
+
+
+		public function __construct($looktypeId) {
+			$this->setLooktype($looktypeId);
+		}
+
+		private function setLooktype($looktypeId) {
+			$this->objectInstance = new Object();
+			$this->objectInstance->getLooktype($looktypeId);
+			return $this;
+		}
+
+		public function setColors($head, $body, $legs, $feet) {
+			$this->looktypeColors = [$head, $body, $legs, $feet];
+			return $this;
+		}
+
+		public function setAddons($addons) {
+			$this->looktypeAddons = $addons;
+			return $this;
+		}
+
+		public function setMount($mountId) {
+			$this->looktypeMounted = 1;
+
+			if ($mountId !== true) {
+				$this->mountObjectInstance = new Looktype($mountId);
+				// $this->mountObjectInstance->setLooktype($mountId);
+				return $this->mountObjectInstance;
+			}
+		}
+
+		public function setStep($step) {
+			$this->looktypeStep = $step;
+			return $this;
+		}
+
+		public function setDirection($direction) {
+			$this->looktypeDirection = $direction;
+			return $this;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+		public function getFrameMap() {
+			$frameMap = imagecreatetruecolor(512, 256);
+
+			for ($direction = 0; $direction <= 3; $direction++) {
+				// $dirImage = $this->generateFrameLayer(0, $direction, 0, 0, false, 0);
+				// self::copyImageToPosition($frameMap, $dirImage, 0, $direction*64);
+
+				for ($step = 0; $step <= 7; $step++) {
+					$image = SELF::getColorizedOutfitFrameWithAddons($this->objectInstance->object, $this->looktypeColors, $direction, $this->looktypeAddons, 0, ($step+1));
+					self::copyImageToPosition($frameMap, $image, $step*64, $direction*64);
+				}
+			}
+
+			return $frameMap;
+		}
+
+		public function getFrame() {
+			$targetImage = SELF::getColorizedOutfitFrameWithAddons(
+				$this->objectInstance->object, $this->looktypeColors, $this->looktypeDirection, $this->looktypeAddons, $this->looktypeMounted/*mounted*/, /* $inMove,*/ $this->looktypeStep
+			);
 
 			return $targetImage;
 		}
 
 	}
+
+
+
+
+
+
+	//print "<br> res: ".$spritesPerResolution;
+	// print "<br> lay: ".$spritesPerLayer;
+	// print "<br> dir: ".$spritesPerDirection;
+	// print "<br> add: ".$spritesPerAddon;
+	// print "<br> mou: ".$spritesPerMount;
+	// print "<br> ste: ".$spritesPerStep;
+	// print "<br>";
+	// print "<br> index: ".$index;
+	// print "<br><br>";

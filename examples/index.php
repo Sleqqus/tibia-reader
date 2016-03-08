@@ -12,8 +12,8 @@
 	// TibiaReader\CONFIG::setDataFilePath("resources/760Tibia.dat");
 	// TibiaReader\CONFIG::setSpriteFilePath("resources/760Tibia.spr");
 
-	TibiaReader\CONFIG::setDataFilePath("resources/1084Tibia.dat");
-	TibiaReader\CONFIG::setSpriteFilePath("resources/1084Tibia.spr");
+	TibiaReader\CONFIG::setDataFilePath("resources/1082Tibia.dat");
+	TibiaReader\CONFIG::setSpriteFilePath("resources/1082Tibia.spr");
 
 	// TibiaReader\CONFIG::setDataFilePath("resources/1050Tibia.dat");
 	// TibiaReader\CONFIG::setSpriteFilePath("resources/1050Tibia.spr");
@@ -36,18 +36,23 @@
 	// $object->printFileInformation();
 
 
-	$outfit = new TibiaReader\Looktype(128);
+	$outfit = new TibiaReader\Looktype(733);
 	// $outfit = new TibiaReader\Looktype(17);
 	// $outfit->setLooktype(128);
 
 	// $outfit->setColors(78, 69, 58, 76);
-	$outfit->setColors(0, 69, 0, 76);
+	$outfit->setColors(100, 20, 40, 31);
 
 	$outfit->setAddons(1);
-	$outfit->setMount(12)->setColors(123, 123, 123, 123);
+	$outfit->setMount(726)->setColors(123, 123, 123, 123);
+	// $outfit->setMount(true);
 
 
-	$image = $outfit->setDirection(1)->setStep(1)->getFrame();
+	// $image = $outfit->setDirection(2)->setStep(1)->getFrame();
+
+	$image = $outfit->getFrameMap();
+	$image = $outfit->getFrameMap();
+
 
 
 	header("Content-type: image/png");

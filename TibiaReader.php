@@ -120,20 +120,16 @@
 			// self::$spriteCaching = $spriteCaching;
 		// }
 	}
-	
+
 	CONFIG::$mainCacheDir     = dirname(__FILE__).DIRECTORY_SEPARATOR."cache".DIRECTORY_SEPARATOR;
 	CONFIG::$dataFileCacheDir = CONFIG::$mainCacheDir."data".DIRECTORY_SEPARATOR;
 	CONFIG::$looktypeCacheDir = CONFIG::$mainCacheDir."looktype".DIRECTORY_SEPARATOR;
 	// CONFIG::$spriteCacheDir = CONFIG::$mainCacheDir."spries".DIRECTORY_SEPARATOR;
 
-	if (!file_exists(CONFIG::$mainCacheDir)) {
-		mkdir(CONFIG::$mainCacheDir);
-	}
-	if (!file_exists(CONFIG::$dataFileCacheDir)) {
-		mkdir(CONFIG::$dataFileCacheDir);
-	}
-	if (!file_exists(CONFIG::$looktypeCacheDir)) {
-		mkdir(CONFIG::$looktypeCacheDir);
+	foreach ([CONFIG::$mainCacheDir, CONFIG::$dataFileCacheDir, CONFIG::$looktypeCacheDir] as $path) {
+		if (!file_exists($path)) {
+			mkdir($path);
+		}
 	}
 
 
