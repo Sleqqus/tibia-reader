@@ -5,25 +5,21 @@
 	TibiaReader\Config::setDataCaching(true);
 
 
+	$formId = (int) ($_GET['id'] ?? 100);
+	$type = (int) ($_GET['type'] ?? 0);
+
 	$object = new TibiaReader\DatObject();
 
-	if (isset($_GET['id'])) {
-		$id = (int) $_GET['id'];
-		switch ($_GET['type']) {
-			case '1': $object->getLooktype($id); break;
-			case '2': $object->getEffect($id); break;
-			case '3': $object->getProjectile($id); break;
-			default:  $object->getItem($id); break;
-		}
-	} else {
-		$object->getItem(100);
+	switch ($type) {
+		case 1:  $object->getLooktype($formId); break;
+		case 2:  $object->getEffect($formId); break;
+		case 3:  $object->getProjectile($formId); break;
+		default: $object->getItem($formId); break;
 	}
 
-	$formId = $_GET['id'] ?? 100;
-
 	$selectedType = ['', '', '', ''];
-	if (isset($_GET['type'])) {
-		$selectedType[$_GET['type']] = 'selected="selected"';
+	if (isset($selectedType[$type])) {
+		$selectedType[$type] = 'selected="selected"';
 	}
 ?>
 <!doctype html>

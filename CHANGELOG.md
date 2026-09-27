@@ -36,3 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Unknown flags throw an exception naming the flag and file signature, instead of an undefined-index error.
 - The error messages of `setSpriteFilePath()` and `setDataFilePath()` were swapped.
 - `Sprite` declares its `$fileSignature` property. It was created dynamically before, which PHP 8.2+ deprecates.
+
+### Security
+
+- The object explorer example printed the `id` query parameter into the page unescaped, and used `type` directly as an array key. Both are now cast to integers, which closes a cross-site scripting (XSS) hole.
