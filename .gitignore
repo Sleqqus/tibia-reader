@@ -3,3 +3,5 @@ cache/*
 sftp-config.json
 .DS_Store
 .vscode/
+vendor/
+composer.lock

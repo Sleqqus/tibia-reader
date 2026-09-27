@@ -1,30 +1,21 @@
 <?php
-	require('../TibiaReader.php');
-	TibiaReader\CONFIG::setDataFilePath("resources/1084Tibia.dat");
-	TibiaReader\CONFIG::setDataCaching(true);
+	require '../TibiaReader.php';
 
-	$obj = new TibiaReader\Object();
-	print "<br>" . $obj->fileLooktypes;
+	TibiaReader\Config::setDataFilePath('resources/1084Tibia.dat');
+	TibiaReader\Config::setDataCaching(true);
 
+	$obj = new TibiaReader\DatObject();
 
-	for ($looktype=1; $looktype <= $obj->fileLooktypes; $looktype++) {
+	print '<br>' . $obj->fileLooktypes;
+
+	for ($looktype = 1; $looktype <= $obj->fileLooktypes; $looktype++) {
 		$obj->getLooktype($looktype);
 
-		// if ($obj->object["frameGroups"][0]["animations"] > 1) {
-		// 	print "<br>" . $obj->objectId;
-		//
-		// 	if (isset($obj->object["frameGroups"][1])) {
-		// 		print "<--------------------------------- WTF";
-		// 	}
-		// }
+		if (!isset($obj->object['frameGroups'][1])) {
+			print '<br>' . $obj->objectId;
 
-		if (!isset($obj->object["frameGroups"][1])) {
-			print "<br>" . $obj->objectId;
-
-			if ($obj->object["frameGroups"][0]["animations"] === 1) {
-				print "<--------------------------------- WTF";
+			if ($obj->object['frameGroups'][0]['animations'] === 1) {
+				print '<--------------------------------- WTF';
 			}
 		}
-
 	}
-?>

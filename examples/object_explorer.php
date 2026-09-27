@@ -1,34 +1,29 @@
 <?php
-	require('../TibiaReader.php');
+	require '../TibiaReader.php';
+
+	TibiaReader\Config::setDataFilePath('resources/1084Tibia.dat');
+	TibiaReader\Config::setDataCaching(true);
 
 
-	// TibiaReader\CONFIG::setDataFilePath("resources/760Tibia.dat");
-	TibiaReader\CONFIG::setDataFilePath("resources/1084Tibia.dat");
-	// TibiaReader\CONFIG::setSpriteFilePath("resources/1084Tibia.spr");
+	$object = new TibiaReader\DatObject();
 
-	TibiaReader\CONFIG::setDataCaching(true);
-
-
-	$object = new TibiaReader\Object();
-
-	if (isset($_GET["id"])) {
-		$id = (int)$_GET["id"];
-		switch($_GET["type"]) {
-			case "1": $object->getLooktype($id); break;
-			case "2": $object->getEffect($id); break;
-			case "3": $object->getProjectile($id); break;
+	if (isset($_GET['id'])) {
+		$id = (int) $_GET['id'];
+		switch ($_GET['type']) {
+			case '1': $object->getLooktype($id); break;
+			case '2': $object->getEffect($id); break;
+			case '3': $object->getProjectile($id); break;
 			default:  $object->getItem($id); break;
 		}
 	} else {
 		$object->getItem(100);
 	}
 
+	$formId = $_GET['id'] ?? 100;
 
-	$formId = (isset($_GET["id"])) ? $_GET["id"] : 100;
-
-	$selectedType = ["", "", "", ""];
-	if (isset($_GET["type"])) {
-		$selectedType[$_GET["type"]] = 'selected="selected"';
+	$selectedType = ['', '', '', ''];
+	if (isset($_GET['type'])) {
+		$selectedType[$_GET['type']] = 'selected="selected"';
 	}
 ?>
 <!doctype html>
@@ -52,7 +47,6 @@
 		#objectProperties {
 			width: 48%;
 			min-height: 100%;
-			/*background: gray;*/
 			border-right: 1px dashed gray;
 			float: left;
 			padding: 10px;
@@ -96,26 +90,17 @@
 	</div>
 	<div id="objectSprites">
 		<?php
-			if(isset($object->object["frameGroups"])) {
-				foreach ($object->object["frameGroups"] as $frameGroup => $group) {
-					print '<div class="frameGroup">';
-					print "Framegroup: ".$frameGroup." <br>";
-					print '<div class="spritesContainer">';
-					foreach ($group["spriteIds"] as $index => $id) {
-						print '<img src="sprite.php?id='.$id.'">';
-						if (($index+1) % 16 == 0) {
-							print '<div style="clear: left"></div>';
-						}
-					}
-					print '</div>';
-					print '</div>';
-				}
-			} else {
+			$frameGroups = $object->object['frameGroups'] ?? [null => $object->object];
+
+			foreach ($frameGroups as $frameGroup => $group) {
 				print '<div class="frameGroup">';
+				if ($frameGroup !== null) {
+					print 'Framegroup: ' . $frameGroup . ' <br>';
+				}
 				print '<div class="spritesContainer">';
-				foreach ($object->object["spriteIds"] as $index => $id) {
-					print '<img src="sprite.php?id='.$id.'">';
-					if (($index+1) % 16 == 0) {
+				foreach ($group['spriteIds'] as $index => $id) {
+					print '<img src="sprite.php?id=' . $id . '">';
+					if (($index + 1) % 16 == 0) {
 						print '<div style="clear: left"></div>';
 					}
 				}
