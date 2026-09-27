@@ -60,12 +60,9 @@ class DatObject
 		$this->determineFrameGroups();
 
 		if (Config::$dataFileMapping) {
-			// Create and save file map if caching is enabled and file isn't already mapped
-			if (!$this->isFileMapped()) {
-				$this->mapFile();
-			}
-
-			$this->cachedFileMap = file($this->cacheFilePath());
+			$this->cachedFileMap = $this->isFileMapped()
+				? file($this->cacheFilePath(), FILE_IGNORE_NEW_LINES)
+				: $this->mapFile();
 		}
 	}
 
@@ -241,21 +238,32 @@ class DatObject
 	/* ----- OBJECT LOOKUP                                                                                   */
 	/* ---------------------------------------------------------------------------------------------------- */
 
-	public function mapFile(): void
+	/**
+	 * Builds the byte offset of every object and saves it to the cache.
+	 *
+	 * @return list<int>
+	 */
+	public function mapFile(): array
 	{
-		$cacheFile = fopen($this->cacheFilePath(), 'w');
-		if ($cacheFile === false) {
-			throw new \RuntimeException('Unable to write data file map to cache directory.');
-		}
+		$fileMap = [];
 
 		$this->fileHandle->jump(12);
 
 		for ($objectIndex = 0; $objectIndex <= $this->objectsTotal; $objectIndex++) {
-			fwrite($cacheFile, $this->fileHandle->getPos() . "\n");
+			$fileMap[] = $this->fileHandle->getPos();
 			$this->readObject($objectIndex);
 		}
 
-		fclose($cacheFile);
+		// Written to a temp file and renamed so concurrent requests never read a partial map
+		$cachePath = $this->cacheFilePath();
+		$tempPath = $cachePath . '.' . bin2hex(random_bytes(4)) . '.tmp';
+
+		if (file_put_contents($tempPath, implode("\n", $fileMap)) === false || !rename($tempPath, $cachePath)) {
+			@unlink($tempPath);
+			throw new \RuntimeException('Unable to write data file map to cache directory.');
+		}
+
+		return $fileMap;
 	}
 
 	public function getObjectAddress(int $objectIndex): int

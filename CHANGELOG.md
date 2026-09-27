@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Outfit rendering reuses one sprite reader instead of opening the `.spr` file again for every layer. A full frame map previously opened it dozens of times.
 - Looktype frame groups are keyed by the group type stored in the file (0 = idle, 1 = moving) instead of by the order they appear in. That type byte used to be read and then ignored.
 - The data file cache is keyed on the file's path, size and modification time. Before, it was keyed on an md5 of the entire `.dat` file, which was computed on every request, even with caching disabled. Maps created under the old naming are no longer used and can be deleted from `cache/data/`.
+- `DatObject::mapFile()` returns the array of object offsets it builds, so the instance that creates the map uses it directly instead of reading it back from disk.
 
 ### Removed
 
@@ -41,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `Sprite` declares its `$fileSignature` property. It was created dynamically before, which PHP 8.2+ deprecates.
 - The last sprite in a `.spr` file could not be read. A sprite's end was taken from the next entry in the address table, which doesn't exist for the last sprite. It is now computed from the sprite's own data-size field.
 - Sprite ID 0, and sprites with no data in the file, return a blank image. Before, they rendered sprite 1 instead.
+- Concurrent first requests could read a partially written data file map and look up objects at wrong offsets. The map is now written to a temporary file and renamed into place.
 
 ### Security
 
