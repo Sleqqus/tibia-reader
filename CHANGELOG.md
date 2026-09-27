@@ -38,6 +38,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Unknown flags throw an exception naming the flag and file signature, instead of an undefined-index error.
 - The error messages of `setSpriteFilePath()` and `setDataFilePath()` were swapped.
 - `Sprite` declares its `$fileSignature` property. It was created dynamically before, which PHP 8.2+ deprecates.
+- The last sprite in a `.spr` file could not be read. A sprite's end was taken from the next entry in the address table, which doesn't exist for the last sprite. It is now computed from the sprite's own data-size field.
+- Sprite ID 0, and sprites with no data in the file, return a blank image. Before, they rendered sprite 1 instead.
 
 ### Security
 

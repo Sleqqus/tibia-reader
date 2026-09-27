@@ -13,8 +13,8 @@ class Sprite
 	// File signatures at or above this value (Tibia 9.60+) store the sprites count as 32-bit
 	private const SIGNATURE_32BIT_COUNT = 1341814009;
 
-	// Each sprite entry starts with a 3-byte color key and a 2-byte pixel-data size
-	private const SPRITE_HEADER_SIZE = 5;
+	// Each sprite entry starts with a 3-byte color key, followed by a 2-byte pixel-data size
+	private const COLOR_KEY_SIZE = 3;
 
 	private FileReader $fileHandle;
 	private int $spritesCountSize = 2;
@@ -51,51 +51,46 @@ class Sprite
 	}
 
 	/**
-	 * Returns start & end position of sprite content in file.
-	 *
-	 * @return array{0: int, 1: int}
+	 * Returns position of sprite content in file, or 0 if the sprite is empty.
 	 */
-	private function getSpriteAddress(int $spriteId): array
+	private function getSpriteAddress(int $spriteId): int
 	{
 		// Skip file signature and sprites count
 		$firstSpriteAddressAt = 4 + $this->spritesCountSize;
 
-		$spriteAddressAt = $firstSpriteAddressAt + (($spriteId - 1) * 4);
-
-		// If sprite has no address in file assigned, jump to first, blank sprite
-		if ($this->fileHandle->jump($spriteAddressAt)->readInt32() === 0) {
-			$spriteAddressAt = $firstSpriteAddressAt;
-		}
-
-		$spriteBegin = $this->fileHandle->jump($spriteAddressAt)->readInt32();
-
-		// Next sprite address is also end of previous sprite
-		// If next sprite has no address, jump to next until found
-		$spriteEnd = $this->fileHandle->jump($spriteAddressAt + 4)->readInt32();
-		while ($spriteEnd === 0) {
-			$spriteEnd = $this->fileHandle->readInt32();
-		}
-
-		return [$spriteBegin, $spriteEnd];
+		return $this->fileHandle->jump($firstSpriteAddressAt + (($spriteId - 1) * 4))->readInt32();
 	}
 
 	public function getSprite(int $spriteId, bool $alphaChannel = false): GdImage
 	{
-		if ($spriteId === 0) {
-			$spriteId = 1;
-		}
-
 		if ($spriteId > $this->spritesCount) {
 			throw new \OutOfRangeException("Specified sprite ID ({$spriteId}) is bigger than sprites count ({$this->spritesCount})!");
 		}
 
-		[$spriteBegin, $spriteEnd] = $this->getSpriteAddress($spriteId);
-
-		$this->fileHandle->jump($spriteBegin + self::SPRITE_HEADER_SIZE);
-
 		// Initialize empty image and fill it with default transparency color (pink)
 		$image = imagecreatetruecolor(32, 32);
 		imagefill($image, 0, 0, self::TRANSPARENT_COLOR);
+
+		// Sprite id 0, and ids with no address assigned, are empty sprites
+		$spriteAddress = ($spriteId > 0) ? $this->getSpriteAddress($spriteId) : 0;
+
+		if ($spriteAddress !== 0) {
+			$this->decodePixels($image, $spriteAddress);
+		}
+
+		if ($alphaChannel) {
+			imagecolortransparent($image, self::TRANSPARENT_COLOR);
+		}
+
+		return $image;
+	}
+
+	private function decodePixels(GdImage $image, int $spriteAddress): void
+	{
+		$this->fileHandle->jump($spriteAddress + self::COLOR_KEY_SIZE);
+
+		$dataSize = $this->fileHandle->readInt16();
+		$spriteEnd = $this->fileHandle->getPos() + $dataSize;
 
 		// Pixel data is run-length encoded: pairs of (transparent pixels, colored pixels),
 		// followed by 3 bytes of RGB per colored pixel
@@ -109,12 +104,6 @@ class Sprite
 				$pixel++;
 			}
 		}
-
-		if ($alphaChannel) {
-			imagecolortransparent($image, self::TRANSPARENT_COLOR);
-		}
-
-		return $image;
 	}
 
 	public function printSprite(int $spriteId, bool $alphaChannel = false): void
