@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Cache directories are created the first time caching is used, instead of whenever the library is included.
 - Invalid object or sprite IDs throw `OutOfRangeException`. Invalid configuration throws `InvalidArgumentException`. Both extend `Exception`, so existing `catch` blocks still work.
 - **Breaking:** misspelled flag names fixed in parsed objects: `immoble` → `immobile` and `block_missle` → `block_missile`.
+- Outfit rendering reuses one sprite reader instead of opening the `.spr` file again for every layer. A full frame map previously opened it dozens of times.
 
 ### Removed
 

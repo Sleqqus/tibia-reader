@@ -39,6 +39,9 @@ class Looktype
 		0x54007F, 0x7F007F, 0x7F0055, 0x7F002A, 0x7F0000,
 	];
 
+	// Shared across all instances so composing outfits doesn't reopen the .spr file per frame
+	private static ?Sprite $spriteReader = null;
+
 	private DatObject $objectInstance;
 	private ?Looktype $mountObjectInstance = null;
 
@@ -186,11 +189,11 @@ class Looktype
 		$frameSet = array_slice($frameGroup['spriteIds'], $index, $spritesPerLayer);
 
 		$frame = self::createBlankImage($frameGroup['width'], $frameGroup['height']);
-		$sprite = new Sprite();
+		self::$spriteReader ??= new Sprite();
 
 		for ($y = $frameGroup['height']; $y > 0; $y--) {
 			for ($x = $frameGroup['width']; $x > 0; $x--) {
-				$currentSprite = $sprite->getSprite((int) array_shift($frameSet));
+				$currentSprite = self::$spriteReader->getSprite((int) array_shift($frameSet));
 				self::copySpriteToPosition($frame, $currentSprite, $x, $y);
 			}
 		}
