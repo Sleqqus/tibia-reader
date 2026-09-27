@@ -226,11 +226,12 @@ class DatObject
 			$object['frameGroups'] = [];
 
 			for ($frameGroup = 0; $frameGroup < $object['frameGroupsCount']; $frameGroup++) {
+				$frameGroupIndex = $frameGroup;
 				if ($object['type'] === 'looktype') {
 					$frameGroupIndex = $this->fileHandle->readByte();
 				}
 
-				$object['frameGroups'][] = $this->readObjectProperties();
+				$object['frameGroups'][$frameGroupIndex] = $this->readObjectProperties();
 			}
 		} else {
 			$object = array_merge($object, $this->readObjectProperties());

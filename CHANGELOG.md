@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Invalid object or sprite IDs throw `OutOfRangeException`. Invalid configuration throws `InvalidArgumentException`. Both extend `Exception`, so existing `catch` blocks still work.
 - **Breaking:** misspelled flag names fixed in parsed objects: `immoble` → `immobile` and `block_missle` → `block_missile`.
 - Outfit rendering reuses one sprite reader instead of opening the `.spr` file again for every layer. A full frame map previously opened it dozens of times.
+- Looktype frame groups are keyed by the group type stored in the file (0 = idle, 1 = moving) instead of by the order they appear in. That type byte used to be read and then ignored.
 
 ### Removed
 
