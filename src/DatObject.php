@@ -20,7 +20,6 @@ class DatObject
 
 	private FileReader $fileHandle;
 	private array $cachedFileMap = [];
-	private string $fileHash;
 
 	public array $object = [];
 	public ?int $objectId = null;
@@ -66,7 +65,7 @@ class DatObject
 				$this->mapFile();
 			}
 
-			$this->cachedFileMap = file(Config::dataCacheDir() . $this->fileHash);
+			$this->cachedFileMap = file($this->cacheFilePath());
 		}
 	}
 
@@ -111,8 +110,6 @@ class DatObject
 		// Item ids start at 100
 		$this->filePhysicalItems = $this->fileItems - 100;
 		$this->objectsTotal      = $this->filePhysicalItems + $this->fileLooktypes + $this->fileEffects + $this->fileProjectiles;
-
-		$this->fileHash = md5_file(Config::$dataFilePath);
 	}
 
 	private function getObjectTypeByIndex(int $objectIndex): string
@@ -246,7 +243,7 @@ class DatObject
 
 	public function mapFile(): void
 	{
-		$cacheFile = fopen(Config::dataCacheDir() . $this->fileHash, 'w');
+		$cacheFile = fopen($this->cacheFilePath(), 'w');
 		if ($cacheFile === false) {
 			throw new \RuntimeException('Unable to write data file map to cache directory.');
 		}
@@ -278,7 +275,16 @@ class DatObject
 
 	private function isFileMapped(): bool
 	{
-		return file_exists(Config::dataCacheDir() . $this->fileHash);
+		return file_exists($this->cacheFilePath());
+	}
+
+	// Keyed on path, size and modification time so the data file isn't hashed on every request
+	private function cacheFilePath(): string
+	{
+		$path = realpath(Config::$dataFilePath);
+		$key = md5($path . '|' . filesize($path) . '|' . filemtime($path));
+
+		return Config::dataCacheDir() . $key;
 	}
 
 	private function getObject(int $objectIndex): void

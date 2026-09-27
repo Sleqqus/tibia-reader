@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Breaking:** misspelled flag names fixed in parsed objects: `immoble` → `immobile` and `block_missle` → `block_missile`.
 - Outfit rendering reuses one sprite reader instead of opening the `.spr` file again for every layer. A full frame map previously opened it dozens of times.
 - Looktype frame groups are keyed by the group type stored in the file (0 = idle, 1 = moving) instead of by the order they appear in. That type byte used to be read and then ignored.
+- The data file cache is keyed on the file's path, size and modification time. Before, it was keyed on an md5 of the entire `.dat` file, which was computed on every request, even with caching disabled. Maps created under the old naming are no longer used and can be deleted from `cache/data/`.
 
 ### Removed
 
