@@ -93,13 +93,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
-[c8901a5]: https://bitbucket.org/Vencis/tibia-reader/commits/c8901a5c3d8368aed42c1d62b59c2d6cbe93487e
-[5a60f45]: https://bitbucket.org/Vencis/tibia-reader/commits/5a60f458c27bd942fedab9c2a210da95c7b94681
-[0e927aa]: https://bitbucket.org/Vencis/tibia-reader/commits/0e927aae8f8e99e101c0a6658c9563332e27b789
-[f234ead]: https://bitbucket.org/Vencis/tibia-reader/commits/f234eadceb80188ee132039a940dde5d025deac8
-[a5f8aee]: https://bitbucket.org/Vencis/tibia-reader/commits/a5f8aee413ed9d2adb0e768872d8da5291f9503c
-[93b2ecd]: https://bitbucket.org/Vencis/tibia-reader/commits/93b2ecd7f889d364b1d75344a490a2a7c1882141
-[dce3861]: https://bitbucket.org/Vencis/tibia-reader/commits/dce38614a3a1b5490449e3ade9b0a0ac3ec1e37d
-[e830913]: https://bitbucket.org/Vencis/tibia-reader/commits/e8309137ddc21be3abe179a929e16eb6493556b8
-[adc0b24]: https://bitbucket.org/Vencis/tibia-reader/commits/adc0b2448c0b3573edcd4dce052bb1060c3bd913
-[45d95e4]: https://bitbucket.org/Vencis/tibia-reader/commits/45d95e4d2c272f19c4e08c1712c6eb12d953d1d8
+[683573c]: https://github.com/Sleqqus/TibiaReader/commit/683573cb8afa0a8e78c2e981502559009b1aecae
+[ac91107]: https://github.com/Sleqqus/TibiaReader/commit/ac911076e86d5ae0bf315e7b817ea1359d0fc6df
+[fdb7f2e]: https://github.com/Sleqqus/TibiaReader/commit/fdb7f2e8027c9366071874d005c7da6817598de7
+[bb17a3f]: https://github.com/Sleqqus/TibiaReader/commit/bb17a3fe7ce260e54421674a2f0895ff812259c7
+[0479cc1]: https://github.com/Sleqqus/TibiaReader/commit/0479cc14bea66430607a471a7457be869eac924b
+[78830fe]: https://github.com/Sleqqus/TibiaReader/commit/78830fe56a686d5b4368568cf4f0715b7fed1827
+[4bde912]: https://github.com/Sleqqus/TibiaReader/commit/4bde9127533610449299019f2e42466dba2bce94
+[36b0aa7]: https://github.com/Sleqqus/TibiaReader/commit/36b0aa7781bac4e195b37f81dbb1807e8f2b685d
+[85e5e14]: https://github.com/Sleqqus/TibiaReader/commit/85e5e141a7b212bff22f6f5514f26ea6eec3b957
+[766a02c]: https://github.com/Sleqqus/TibiaReader/commit/766a02c8b9a891f75d11194792bed37b691e5880
