@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - `composer.json` with PSR-4 autoloading (`TibiaReader\` → `src/`). `TibiaReader.php` is kept as a bootstrap for use without Composer.
+- README with installation instructions and usage examples.
 
 ### Changed
 
