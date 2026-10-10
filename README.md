@@ -20,7 +20,7 @@ To install it straight from GitHub instead of Packagist, add the repository to y
 
 ```json
 "repositories": [
-    {"type": "vcs", "url": "https://github.com/Sleqqus/TibiaReader"}
+    {"type": "vcs", "url": "https://github.com/Sleqqus/tibia-reader"}
 ]
 ```
 
