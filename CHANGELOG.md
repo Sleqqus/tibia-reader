@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [f94efc0] Point repository links at Sleqqus/tibia-reader (2026-10-10)
+
+### Changed
+
+- The GitHub repository was renamed from `Sleqqus/TibiaReader` to `Sleqqus/tibia-reader`. The `vcs` repository example in the README and the commit links in this changelog use the new URL. GitHub redirects the old URL, but it may stop doing so if a repository named `TibiaReader` is created again.
+
 ## [0bd8ae5] Keep the data file map in the system temp directory (2026-10-10)
 
 ### Changed
@@ -183,6 +189,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
+[f94efc0]: https://github.com/Sleqqus/tibia-reader/commit/f94efc02a71fe42983ec172f978a262476dd36a2
 [0bd8ae5]: https://github.com/Sleqqus/tibia-reader/commit/0bd8ae574e09f249aa8abbe65c7b005297b4a1ba
 [4ea9c47]: https://github.com/Sleqqus/tibia-reader/commit/4ea9c475c5e63be40daa0e8d0159cb298fd21d06
 [c6306fb]: https://github.com/Sleqqus/tibia-reader/commit/c6306fb38058e0ff2df0fbd59d88f7a2e8926ab3
