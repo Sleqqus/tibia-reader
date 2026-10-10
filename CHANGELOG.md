@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [0bd8ae5] Keep the data file map in the system temp directory (2026-10-10)
+
+### Changed
+
+- With data caching on, the map of object offsets is written to `tibia-reader/v1/data/` in the system temp directory (`Client::defaultCacheDir()`) unless `cacheDir` or `Config::$mainCacheDir` is set. It used to go to `cache/` inside the library folder, which Composer replaces on every update. Maps in the old folder are no longer read and can be deleted.
+- When the default cache folder can't be created or written, offsets are kept in memory only instead of throwing. A cache folder that was set explicitly still throws.
+
+### Fixed
+
+- A data file map that was truncated or doesn't match the `.dat` file is rebuilt. Before, it was read as is and objects were looked up at wrong offsets.
+
 ## [4ea9c47] Document TIBIA_CLIENT_DIR for the examples in the README (2026-10-10)
 
 ### Changed
@@ -172,6 +183,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
+[0bd8ae5]: https://github.com/Sleqqus/TibiaReader/commit/0bd8ae574e09f249aa8abbe65c7b005297b4a1ba
 [4ea9c47]: https://github.com/Sleqqus/TibiaReader/commit/4ea9c475c5e63be40daa0e8d0159cb298fd21d06
 [c6306fb]: https://github.com/Sleqqus/TibiaReader/commit/c6306fb38058e0ff2df0fbd59d88f7a2e8926ab3
 [6f30d41]: https://github.com/Sleqqus/TibiaReader/commit/6f30d41b680a4138864fb8c2ba638f5b64d1898f

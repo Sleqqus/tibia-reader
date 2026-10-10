@@ -13,6 +13,7 @@ class Config
 	public static ?string $dataFilePath = null;
 	public static ?string $spriteFilePath = null;
 	public static ?int $clientVersion = null;
+	/** Cache root; data/ inside it holds the data file map. Defaults to Client::defaultCacheDir(). */
 	public static ?string $mainCacheDir = null;
 
 	public static bool $dataFileMapping = false;
@@ -83,7 +84,7 @@ class Config
 			self::$spriteFilePath,
 			self::$clientVersion,
 			self::$dataFileMapping,
-			self::$dataFileCacheDir ?? self::mainCacheDir() . 'data' . DIRECTORY_SEPARATOR,
+			self::$dataFileCacheDir ?? (self::$mainCacheDir === null ? null : self::mainCacheDir() . 'data' . DIRECTORY_SEPARATOR),
 		];
 
 		if (self::$client === null || self::$clientSettings !== $settings) {
@@ -112,14 +113,12 @@ class Config
 
 	private static function mainCacheDir(): string
 	{
-		self::$mainCacheDir ??= dirname(__DIR__) . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
-
-		return self::$mainCacheDir;
+		return rtrim(self::$mainCacheDir ?? Client::defaultCacheDir(), '/\\') . DIRECTORY_SEPARATOR;
 	}
 
 	private static function ensureDir(string $path): void
 	{
-		if (!is_dir($path) && !mkdir($path, 0775, true) && !is_dir($path)) {
+		if (!is_dir($path) && !@mkdir($path, 0775, true) && !is_dir($path)) {
 			throw new \RuntimeException("Unable to create cache directory: {$path}");
 		}
 	}

@@ -124,7 +124,8 @@ The files come from the [downloads.ots.me](https://downloads.ots.me/?dir=data/ti
 
 - Supported `.dat` signatures are listed in [src/ClientVersion.php](src/ClientVersion.php). Flag names follow OTClient's naming and are listed in [src/Flags.php](src/Flags.php).
 - A warning is raised when the `.spr` file looks like it comes from a different client version than the `.dat` file.
-- With data caching on, a map of object byte offsets (keyed by the file's path, size and modification time) is written to `cache/data/` on first use, making object lookups O(1) on later requests. Without it, offsets are still remembered for the lifetime of the reader.
+- With data caching on, a map of object byte offsets (keyed by the file's path, size and modification time) is written on first use, making object lookups O(1) on later requests. Without it, offsets are still remembered for the lifetime of the reader.
+- The map goes to `tibia-reader/v1/data/` in the system temp directory (`Client::defaultCacheDir()`), so it survives `composer update` and needs no setup. If that folder can't be written, the map is kept in memory only. Pass `cacheDir:` to the `Client` (or set `Config::$mainCacheDir`) to keep it somewhere that outlives reboots; a folder you set must be writable, or an exception is thrown. Rebuilding a lost map takes about 50 ms.
 
 ## License
 
