@@ -1,8 +1,5 @@
 <?php
-	require '../TibiaReader.php';
-
-	TibiaReader\Config::setDataFilePath('resources/1084Tibia.dat');
-	TibiaReader\Config::setDataCaching(true);
+	require __DIR__ . '/config.php';
 
 	$obj = new TibiaReader\DatObject();
 

@@ -86,7 +86,13 @@ $client = new Client('custom.dat', 'custom.spr', clientVersion: 1098);
 
 Versions 7.55 to 10.99 are accepted.
 
-Browsable demos live in [examples/](examples/) (`sprite_browser.php`, `object_explorer.php`) — drop your client files into `examples/resources/` first.
+Browsable demos live in [examples/](examples/) (`sprite_browser.php`, `object_explorer.php`). They read the client files `composer test-data` downloads, 10.75 by default:
+
+```sh
+cd examples
+php -S localhost:8000                     # http://localhost:8000/object_explorer.php
+TIBIA_VERSION=854 php -S localhost:8000   # any other version in tests/data/
+```
 
 ## Tests
 
