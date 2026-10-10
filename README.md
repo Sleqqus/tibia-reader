@@ -125,3 +125,7 @@ The files come from the [downloads.ots.me](https://downloads.ots.me/?dir=data/ti
 - Supported `.dat` signatures are listed in [src/ClientVersion.php](src/ClientVersion.php). Flag names follow OTClient's naming and are listed in [src/Flags.php](src/Flags.php).
 - A warning is raised when the `.spr` file looks like it comes from a different client version than the `.dat` file.
 - With data caching on, a map of object byte offsets (keyed by the file's path, size and modification time) is written to `cache/data/` on first use, making object lookups O(1) on later requests. Without it, offsets are still remembered for the lifetime of the reader.
+
+## License
+
+MIT, see [LICENSE](LICENSE). Tibia and its client files belong to CipSoft and aren't covered by it.

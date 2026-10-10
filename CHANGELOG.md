@@ -29,6 +29,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `TIBIA_CLIENT_DIR` points the examples at any folder holding `Tibia.dat` and `Tibia.spr`, for installs from the Composer package, which has no `tests/data/`.
 
+## [6f30d41] License under MIT (2026-10-10)
+
+### Added
+
+- The library is licensed under MIT: a `LICENSE` file, the `license` field in `composer.json` and a License section in the README.
+
 ## [4321313] Install with composer require and leave tests out of the package (2026-10-10)
 
 ### Changed
@@ -168,6 +174,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 [4ea9c47]: https://github.com/Sleqqus/TibiaReader/commit/4ea9c475c5e63be40daa0e8d0159cb298fd21d06
 [c6306fb]: https://github.com/Sleqqus/TibiaReader/commit/c6306fb38058e0ff2df0fbd59d88f7a2e8926ab3
+[6f30d41]: https://github.com/Sleqqus/TibiaReader/commit/6f30d41b680a4138864fb8c2ba638f5b64d1898f
 [4321313]: https://github.com/Sleqqus/TibiaReader/commit/43213134dff54ccec45410b0a03aade2d1816fae
 [bbae3a8]: https://github.com/Sleqqus/TibiaReader/commit/bbae3a88a1fc0c4883d00d487091c2c058aa5b71
 [e089791]: https://github.com/Sleqqus/TibiaReader/commit/e0897917234bb8a94e6762bd6594cc7d8539d9e2
