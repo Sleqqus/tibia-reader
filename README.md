@@ -6,17 +6,25 @@ Requires **PHP 8.1+** with the **GD** extension.
 
 ## Installation
 
-With Composer (PSR-4 autoloading):
+With Composer:
 
 ```sh
-composer install
+composer require sleqq/tibia-reader
 ```
 
 ```php
 require 'vendor/autoload.php';
 ```
 
-Or without Composer:
+To install it straight from GitHub instead of Packagist, add the repository to your project's `composer.json` first:
+
+```json
+"repositories": [
+    {"type": "vcs", "url": "https://github.com/Sleqqus/TibiaReader"}
+]
+```
+
+Or without Composer, from a copy of this repository:
 
 ```php
 require 'TibiaReader.php';
