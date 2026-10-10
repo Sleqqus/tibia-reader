@@ -16,7 +16,7 @@ use TibiaReader\Sprite;
  */
 final class SpriteReadingTest extends TestCase
 {
-	private const GOLD_COIN = 2148;
+	private const GOLD_COIN = 3031;
 	private const CITIZEN_OUTFIT = 128;
 
 	// Sprites decoded per version, spread evenly over the file

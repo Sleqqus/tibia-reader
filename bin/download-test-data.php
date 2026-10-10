@@ -99,7 +99,6 @@ function download(string $url): string
 	]);
 	$ok = curl_exec($curl);
 	$error = curl_error($curl);
-	curl_close($curl);
 	fclose($file);
 
 	if (!$ok) {

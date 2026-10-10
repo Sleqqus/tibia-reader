@@ -18,10 +18,11 @@ use TibiaReader\FrameGroup;
  */
 final class DatReadingTest extends TestCase
 {
-	// Client ids that mean the same item in every version from 7.60 to 10.x
-	private const BACKPACK = 1988;
-	private const GOLD_COIN = 2148;
-	private const CRYSTAL_COIN = 2160;
+	// Client ids (not the server ids of items.otb, e.g. 2148 for a gold coin) that mean the same item
+	// in every version from 7.60 to 10.x
+	private const BACKPACK = 2854;
+	private const GOLD_COIN = 3031;
+	private const CRYSTAL_COIN = 3043;
 	private const CITIZEN_OUTFIT = 128;
 
 	// The 216 colors of the client's 6x6x6 palette, used by lights and the minimap
