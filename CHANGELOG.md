@@ -4,6 +4,33 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [6f30d41] License under MIT (2026-10-10)
+
+### Added
+
+- The library is licensed under MIT: a `LICENSE` file, the `license` field in `composer.json` and a License section in the README.
+
+## [4321313] Install with composer require and leave tests out of the package (2026-10-10)
+
+### Changed
+
+- The README shows `composer require sleqq/tibia-reader` and how to install from GitHub through a `vcs` repository, instead of `composer install`.
+- `tests/`, `bin/` and `phpunit.xml.dist` are left out of the package Composer downloads for a tagged release.
+
+## [bbae3a8] Run the examples against the downloaded client files (2026-10-10)
+
+### Changed
+
+- The examples read the client files from `tests/data/<version>/` through `examples/config.php`, 10.75 by default; the `TIBIA_VERSION` environment variable picks another downloaded version. They used to expect files in `examples/resources/`.
+- The outfit demo draws looktype 128 with mount 368, which exist in 10.75.
+
+## [e089791] Add tests against real client files of every supported version (2026-10-10)
+
+### Added
+
+- PHPUnit tests that read the real `.dat` and `.spr` files of every version with a recognized signature: version detection, parsing every object up to the end of the file, flag names and values, known items, outfit and projectile patterns, animations and frame groups, the sprite address table, sprite decoding and outfit rendering. Run them with `composer test`.
+- `bin/download-test-data.php` (`composer test-data`) downloads the client files into `tests/data/`, which git ignores. 8.10, 9.85, 10.72 and 10.84 have no known download and are skipped until their files are added by hand.
+
 ## [9404524] Add Client and typed objects; name flags; speed up reading (2026-10-10)
 
 ### Added
@@ -120,6 +147,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
+[6f30d41]: https://github.com/Sleqqus/TibiaReader/commit/6f30d41b680a4138864fb8c2ba638f5b64d1898f
+[4321313]: https://github.com/Sleqqus/TibiaReader/commit/43213134dff54ccec45410b0a03aade2d1816fae
+[bbae3a8]: https://github.com/Sleqqus/TibiaReader/commit/bbae3a88a1fc0c4883d00d487091c2c058aa5b71
+[e089791]: https://github.com/Sleqqus/TibiaReader/commit/e0897917234bb8a94e6762bd6594cc7d8539d9e2
 [9404524]: https://github.com/Sleqqus/TibiaReader/commit/9404524138587dfca04cf203753693be56b65e91
 [683573c]: https://github.com/Sleqqus/TibiaReader/commit/683573cb8afa0a8e78c2e981502559009b1aecae
 [ac91107]: https://github.com/Sleqqus/TibiaReader/commit/ac911076e86d5ae0bf315e7b817ea1359d0fc6df

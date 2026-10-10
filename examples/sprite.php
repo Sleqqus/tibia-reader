@@ -1,7 +1,5 @@
 <?php
-	require '../TibiaReader.php';
-
-	TibiaReader\Config::setSpriteFilePath('resources/1084Tibia.spr');
+	require __DIR__ . '/config.php';
 
 	$spriteId = (int) ($_GET['id'] ?? 1);
 

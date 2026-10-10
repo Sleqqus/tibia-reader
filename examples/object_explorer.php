@@ -1,9 +1,5 @@
 <?php
-	require '../TibiaReader.php';
-
-	TibiaReader\Config::setDataFilePath('resources/1084Tibia.dat');
-	TibiaReader\Config::setDataCaching(true);
-
+	require __DIR__ . '/config.php';
 
 	$formId = (int) ($_GET['id'] ?? 100);
 	$type = (int) ($_GET['type'] ?? 0);

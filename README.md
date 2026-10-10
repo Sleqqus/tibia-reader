@@ -6,17 +6,25 @@ Requires **PHP 8.1+** with the **GD** extension.
 
 ## Installation
 
-With Composer (PSR-4 autoloading):
+With Composer:
 
 ```sh
-composer install
+composer require sleqq/tibia-reader
 ```
 
 ```php
 require 'vendor/autoload.php';
 ```
 
-Or without Composer:
+To install it straight from GitHub instead of Packagist, add the repository to your project's `composer.json` first:
+
+```json
+"repositories": [
+    {"type": "vcs", "url": "https://github.com/Sleqqus/TibiaReader"}
+]
+```
+
+Or without Composer, from a copy of this repository:
 
 ```php
 require 'TibiaReader.php';
@@ -86,10 +94,32 @@ $client = new Client('custom.dat', 'custom.spr', clientVersion: 1098);
 
 Versions 7.55 to 10.99 are accepted.
 
-Browsable demos live in [examples/](examples/) (`sprite_browser.php`, `object_explorer.php`) — drop your client files into `examples/resources/` first.
+Browsable demos live in [examples/](examples/) (`sprite_browser.php`, `object_explorer.php`). They read the client files `composer test-data` downloads, 10.75 by default:
+
+```sh
+cd examples
+php -S localhost:8000                     # http://localhost:8000/object_explorer.php
+TIBIA_VERSION=854 php -S localhost:8000   # any other version in tests/data/
+```
+
+## Tests
+
+The tests read real client files of every version whose `.dat` signature is recognized (see [tests/client-versions.php](tests/client-versions.php)). The files aren't committed; download them into `tests/data/` (ignored by git) first:
+
+```sh
+composer install
+composer test-data           # or: php bin/download-test-data.php 760 1050
+composer test
+```
+
+The files come from the [downloads.ots.me](https://downloads.ots.me/?dir=data/tibia-clients/dat_and_spr) client archive. Versions it doesn't have (8.10, 9.85, 10.72, 10.84) are skipped until you put their `Tibia.dat` and `Tibia.spr` into `tests/data/<version>/`, e.g. `tests/data/1084/`. `composer test -- --display-skipped` lists what was skipped.
 
 ## Notes
 
 - Supported `.dat` signatures are listed in [src/ClientVersion.php](src/ClientVersion.php). Flag names follow OTClient's naming and are listed in [src/Flags.php](src/Flags.php).
 - A warning is raised when the `.spr` file looks like it comes from a different client version than the `.dat` file.
 - With data caching on, a map of object byte offsets (keyed by the file's path, size and modification time) is written to `cache/data/` on first use, making object lookups O(1) on later requests. Without it, offsets are still remembered for the lifetime of the reader.
+
+## License
+
+MIT, see [LICENSE](LICENSE). Tibia and its client files belong to CipSoft and aren't covered by it.
