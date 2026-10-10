@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [f94efc0] Point repository links at Sleqqus/tibia-reader (2026-10-10)
+
+### Changed
+
+- The GitHub repository was renamed from `Sleqqus/TibiaReader` to `Sleqqus/tibia-reader`. The `vcs` repository example in the README and the commit links in this changelog use the new URL. GitHub redirects the old URL, but it may stop doing so if a repository named `TibiaReader` is created again.
+
 ## [0bd8ae5] Keep the data file map in the system temp directory (2026-10-10)
 
 ### Changed
@@ -183,21 +189,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
-[0bd8ae5]: https://github.com/Sleqqus/TibiaReader/commit/0bd8ae574e09f249aa8abbe65c7b005297b4a1ba
-[4ea9c47]: https://github.com/Sleqqus/TibiaReader/commit/4ea9c475c5e63be40daa0e8d0159cb298fd21d06
-[c6306fb]: https://github.com/Sleqqus/TibiaReader/commit/c6306fb38058e0ff2df0fbd59d88f7a2e8926ab3
-[6f30d41]: https://github.com/Sleqqus/TibiaReader/commit/6f30d41b680a4138864fb8c2ba638f5b64d1898f
-[4321313]: https://github.com/Sleqqus/TibiaReader/commit/43213134dff54ccec45410b0a03aade2d1816fae
-[bbae3a8]: https://github.com/Sleqqus/TibiaReader/commit/bbae3a88a1fc0c4883d00d487091c2c058aa5b71
-[e089791]: https://github.com/Sleqqus/TibiaReader/commit/e0897917234bb8a94e6762bd6594cc7d8539d9e2
-[9404524]: https://github.com/Sleqqus/TibiaReader/commit/9404524138587dfca04cf203753693be56b65e91
-[683573c]: https://github.com/Sleqqus/TibiaReader/commit/683573cb8afa0a8e78c2e981502559009b1aecae
-[ac91107]: https://github.com/Sleqqus/TibiaReader/commit/ac911076e86d5ae0bf315e7b817ea1359d0fc6df
-[fdb7f2e]: https://github.com/Sleqqus/TibiaReader/commit/fdb7f2e8027c9366071874d005c7da6817598de7
-[bb17a3f]: https://github.com/Sleqqus/TibiaReader/commit/bb17a3fe7ce260e54421674a2f0895ff812259c7
-[0479cc1]: https://github.com/Sleqqus/TibiaReader/commit/0479cc14bea66430607a471a7457be869eac924b
-[78830fe]: https://github.com/Sleqqus/TibiaReader/commit/78830fe56a686d5b4368568cf4f0715b7fed1827
-[4bde912]: https://github.com/Sleqqus/TibiaReader/commit/4bde9127533610449299019f2e42466dba2bce94
-[36b0aa7]: https://github.com/Sleqqus/TibiaReader/commit/36b0aa7781bac4e195b37f81dbb1807e8f2b685d
-[85e5e14]: https://github.com/Sleqqus/TibiaReader/commit/85e5e141a7b212bff22f6f5514f26ea6eec3b957
-[766a02c]: https://github.com/Sleqqus/TibiaReader/commit/766a02c8b9a891f75d11194792bed37b691e5880
+[f94efc0]: https://github.com/Sleqqus/tibia-reader/commit/f94efc02a71fe42983ec172f978a262476dd36a2
+[0bd8ae5]: https://github.com/Sleqqus/tibia-reader/commit/0bd8ae574e09f249aa8abbe65c7b005297b4a1ba
+[4ea9c47]: https://github.com/Sleqqus/tibia-reader/commit/4ea9c475c5e63be40daa0e8d0159cb298fd21d06
+[c6306fb]: https://github.com/Sleqqus/tibia-reader/commit/c6306fb38058e0ff2df0fbd59d88f7a2e8926ab3
+[6f30d41]: https://github.com/Sleqqus/tibia-reader/commit/6f30d41b680a4138864fb8c2ba638f5b64d1898f
+[4321313]: https://github.com/Sleqqus/tibia-reader/commit/43213134dff54ccec45410b0a03aade2d1816fae
+[bbae3a8]: https://github.com/Sleqqus/tibia-reader/commit/bbae3a88a1fc0c4883d00d487091c2c058aa5b71
+[e089791]: https://github.com/Sleqqus/tibia-reader/commit/e0897917234bb8a94e6762bd6594cc7d8539d9e2
+[9404524]: https://github.com/Sleqqus/tibia-reader/commit/9404524138587dfca04cf203753693be56b65e91
+[683573c]: https://github.com/Sleqqus/tibia-reader/commit/683573cb8afa0a8e78c2e981502559009b1aecae
+[ac91107]: https://github.com/Sleqqus/tibia-reader/commit/ac911076e86d5ae0bf315e7b817ea1359d0fc6df
+[fdb7f2e]: https://github.com/Sleqqus/tibia-reader/commit/fdb7f2e8027c9366071874d005c7da6817598de7
+[bb17a3f]: https://github.com/Sleqqus/tibia-reader/commit/bb17a3fe7ce260e54421674a2f0895ff812259c7
+[0479cc1]: https://github.com/Sleqqus/tibia-reader/commit/0479cc14bea66430607a471a7457be869eac924b
+[78830fe]: https://github.com/Sleqqus/tibia-reader/commit/78830fe56a686d5b4368568cf4f0715b7fed1827
+[4bde912]: https://github.com/Sleqqus/tibia-reader/commit/4bde9127533610449299019f2e42466dba2bce94
+[36b0aa7]: https://github.com/Sleqqus/tibia-reader/commit/36b0aa7781bac4e195b37f81dbb1807e8f2b685d
+[85e5e14]: https://github.com/Sleqqus/tibia-reader/commit/85e5e141a7b212bff22f6f5514f26ea6eec3b957
+[766a02c]: https://github.com/Sleqqus/tibia-reader/commit/766a02c8b9a891f75d11194792bed37b691e5880
