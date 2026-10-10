@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace TibiaReader;
 
+/**
+ * Process-wide default settings, used by `new DatObject()`, `new Sprite()` and `new Looktype($id)`
+ * when no Client is passed. For more than one client version, create Client instances instead.
+ */
 class Config
 {
 	public static ?string $dataFilePath = null;
 	public static ?string $spriteFilePath = null;
+	public static ?int $clientVersion = null;
 	public static ?string $mainCacheDir = null;
 
 	public static bool $dataFileMapping = false;
@@ -16,6 +21,9 @@ class Config
 	public static bool $looktypeCaching = false;
 	public static ?string $looktypeCacheDir = null;
 	public static int|false $looktypeMinImgSize = 64;
+
+	private static ?Client $client = null;
+	private static ?array $clientSettings = null;
 
 	public static function setSpriteFilePath(string $path): void
 	{
@@ -33,6 +41,15 @@ class Config
 		}
 
 		self::$dataFilePath = $path;
+	}
+
+	/**
+	 * Sets the client version (e.g. 1084 for 10.84) instead of detecting it from the .dat file signature.
+	 * Needed for custom clients whose signature isn't recognized. Null restores detection.
+	 */
+	public static function setClientVersion(?int $version): void
+	{
+		self::$clientVersion = $version === null ? null : (new ClientVersion($version))->version;
 	}
 
 	public static function setDataCaching(bool $mapping): void
@@ -53,6 +70,28 @@ class Config
 		}
 
 		self::$looktypeMinImgSize = $size;
+	}
+
+	/**
+	 * The Client built from the settings above. It is rebuilt whenever a setting changes,
+	 * so changing a file path never leaves readers open on the old file.
+	 */
+	public static function client(): Client
+	{
+		$settings = [
+			self::$dataFilePath,
+			self::$spriteFilePath,
+			self::$clientVersion,
+			self::$dataFileMapping,
+			self::$dataFileCacheDir ?? self::mainCacheDir() . 'data' . DIRECTORY_SEPARATOR,
+		];
+
+		if (self::$client === null || self::$clientSettings !== $settings) {
+			self::$client = new Client(...array_combine(['dataFilePath', 'spriteFilePath', 'clientVersion', 'dataCaching', 'cacheDir'], $settings));
+			self::$clientSettings = $settings;
+		}
+
+		return self::$client;
 	}
 
 	public static function dataCacheDir(): string

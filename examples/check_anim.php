@@ -9,12 +9,12 @@
 	print '<br>' . $obj->fileLooktypes;
 
 	for ($looktype = 1; $looktype <= $obj->fileLooktypes; $looktype++) {
-		$obj->getLooktype($looktype);
+		$thing = $obj->getLooktype($looktype);
 
-		if (!isset($obj->object['frameGroups'][1])) {
-			print '<br>' . $obj->objectId;
+		if (!isset($thing->frameGroups[TibiaReader\FrameGroup::MOVING])) {
+			print '<br>' . $thing->id;
 
-			if ($obj->object['frameGroups'][0]['animations'] === 1) {
+			if ($thing->frameGroup()->phases === 1) {
 				print '<--------------------------------- WTF';
 			}
 		}

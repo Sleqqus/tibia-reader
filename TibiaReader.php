@@ -8,8 +8,14 @@ declare(strict_types=1);
  */
 
 require __DIR__ . '/src/FileReader.php';
+require __DIR__ . '/src/ClientVersion.php';
+require __DIR__ . '/src/Client.php';
 require __DIR__ . '/src/Config.php';
 require __DIR__ . '/src/Flags.php';
+require __DIR__ . '/src/ThingCategory.php';
+require __DIR__ . '/src/Animation.php';
+require __DIR__ . '/src/FrameGroup.php';
+require __DIR__ . '/src/ThingType.php';
 require __DIR__ . '/src/Sprite.php';
 require __DIR__ . '/src/DatObject.php';
 require __DIR__ . '/src/Looktype.php';
