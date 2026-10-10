@@ -16,8 +16,14 @@ namespace TibiaReader;
  */
 final class Client
 {
+	// Bumped when the format of the cached data file map changes, so old maps are never read
+	private const CACHE_FORMAT = 'v1';
+
 	public readonly ?int $clientVersion;
 	public readonly string $dataCacheDir;
+
+	/** True when $dataCacheDir wasn't passed in, so a cache that can't be written is skipped instead of throwing. */
+	public readonly bool $usesDefaultCacheDir;
 
 	private ?ClientVersion $version = null;
 	private bool $versionResolved = false;
@@ -29,7 +35,8 @@ final class Client
 	 * @param int|null $clientVersion version number such as 1084 for 10.84. Detected from the .dat file
 	 *        signature when omitted; set it for custom clients whose signature isn't recognized.
 	 * @param bool $dataCaching store a map of object byte offsets in $cacheDir, for O(1) lookups on later requests
-	 * @param string|null $cacheDir where the data file map is stored; defaults to cache/data/ in the library folder
+	 * @param string|null $cacheDir where the data file map is stored; defaults to a tibia-reader folder in the
+	 *        system temp directory (see defaultCacheDir()). Set it to keep the map somewhere that outlives reboots.
 	 */
 	public function __construct(
 		public readonly ?string $dataFilePath = null,
@@ -46,7 +53,20 @@ final class Client
 		}
 
 		$this->clientVersion = $clientVersion === null ? null : (new ClientVersion($clientVersion))->version;
-		$this->dataCacheDir = rtrim($cacheDir ?? dirname(__DIR__) . '/cache/data', '/\\') . DIRECTORY_SEPARATOR;
+		$this->usesDefaultCacheDir = $cacheDir === null;
+		$this->dataCacheDir = rtrim($cacheDir ?? self::defaultCacheDir() . 'data', '/\\') . DIRECTORY_SEPARATOR;
+	}
+
+	/**
+	 * The cache root used when no cache directory is set: tibia-reader/<format>/ in the system temp
+	 * directory. The data file map goes in its data/ folder. It is outside the library folder, which
+	 * Composer replaces on every update and which is often read-only in production. The temp directory
+	 * may be emptied at any time, which only costs one rebuild of the map.
+	 */
+	public static function defaultCacheDir(): string
+	{
+		return rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'tibia-reader'
+			. DIRECTORY_SEPARATOR . self::CACHE_FORMAT . DIRECTORY_SEPARATOR;
 	}
 
 	/**
@@ -104,7 +124,7 @@ final class Client
 
 	public function ensureDataCacheDir(): string
 	{
-		if (!is_dir($this->dataCacheDir) && !mkdir($this->dataCacheDir, 0775, true) && !is_dir($this->dataCacheDir)) {
+		if (!is_dir($this->dataCacheDir) && !@mkdir($this->dataCacheDir, 0775, true) && !is_dir($this->dataCacheDir)) {
 			throw new \RuntimeException("Unable to create cache directory: {$this->dataCacheDir}");
 		}
 

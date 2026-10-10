@@ -71,7 +71,7 @@ class DatObject
 		}
 
 		if ($this->client->dataCaching) {
-			$this->offsets = $this->isFileMapped() ? $this->readFileMap() : $this->mapFile();
+			$this->loadFileMap();
 		}
 	}
 
@@ -245,6 +245,40 @@ class DatObject
 	/* ---------------------------------------------------------------------------------------------------- */
 
 	/**
+	 * Reads the data file map from the cache, or builds and saves it. A map that doesn't match the
+	 * file is rebuilt. When the default cache directory can't be used (read-only, or owned by another
+	 * user), the offsets are kept in memory only; a cache directory that was set explicitly throws.
+	 */
+	private function loadFileMap(): void
+	{
+		try {
+			$fileMap = $this->isFileMapped() ? $this->readFileMap() : null;
+			if ($fileMap !== null && $this->isValidFileMap($fileMap)) {
+				$this->offsets = $fileMap;
+			} else {
+				$this->mapFile();
+			}
+		} catch (\RuntimeException $e) {
+			if (!$this->client->usesDefaultCacheDir) {
+				throw $e;
+			}
+		}
+	}
+
+	/**
+	 * One offset per object plus the end of the last, starting after the header and never past the end
+	 * of the file. Catches truncated maps and maps left by another file or format.
+	 *
+	 * @param list<int> $fileMap
+	 */
+	private function isValidFileMap(array $fileMap): bool
+	{
+		return count($fileMap) === $this->objectsTotal + 1
+			&& $fileMap[0] === self::HEADER_SIZE
+			&& $fileMap[$this->objectsTotal] <= filesize($this->client->dataFilePath);
+	}
+
+	/**
 	 * Builds the byte offset of every object and saves it to the cache.
 	 *
 	 * @return list<int>
@@ -259,7 +293,7 @@ class DatObject
 		$cachePath = $this->cacheFilePath();
 		$tempPath = $cachePath . '.' . bin2hex(random_bytes(4)) . '.tmp';
 
-		if (file_put_contents($tempPath, implode("\n", $fileMap)) === false || !rename($tempPath, $cachePath)) {
+		if (@file_put_contents($tempPath, implode("\n", $fileMap)) === false || !@rename($tempPath, $cachePath)) {
 			@unlink($tempPath);
 			throw new \RuntimeException('Unable to write data file map to cache directory.');
 		}
@@ -296,7 +330,12 @@ class DatObject
 	 */
 	private function readFileMap(): array
 	{
-		return array_map('intval', file($this->cacheFilePath(), FILE_IGNORE_NEW_LINES));
+		$lines = @file($this->cacheFilePath(), FILE_IGNORE_NEW_LINES);
+		if ($lines === false) {
+			throw new \RuntimeException('Unable to read data file map from cache directory.');
+		}
+
+		return array_map('intval', $lines);
 	}
 
 	// Keyed on path, size and modification time so the data file isn't hashed on every request
