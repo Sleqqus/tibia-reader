@@ -4,6 +4,25 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [c6306fb] Harden and fix the examples (2026-10-10)
+
+### Security
+
+- The examples only run from the command line or PHP's built-in server and answer 404 under any other web server, so a web root that exposes `vendor/` doesn't expose them.
+- `DatObject::printObjectInformation()` escapes its output. Text flags such as the market name come from the `.dat` file, so a crafted file could inject HTML into the page. The `printFileInformation()` methods escape the file name too.
+- Query parameters are validated: an id, type or page that isn't a whole number in range gets a 400 instead of being cast to 0 or reaching the reader. Uncaught exceptions answer with a short 500 and leave the details, which can contain file paths, in the server log.
+
+### Fixed
+
+- The sprite browser didn't know the sprite count, so it linked pages past the last sprite and accepted page 0 or negative pages. It now stops at the last sprite and hides Prev/Next past either end.
+- The object explorer shows a note for an id outside the file instead of a fatal `OutOfRangeException`.
+- The outfit demo only sets mount 368 when the file has it, so it works for versions before 8.70.
+- `check_anim.php` was a debug script that read every looktype on each web request. It is now a command-line tool that lists the looktypes without a moving frame group.
+
+### Added
+
+- `TIBIA_CLIENT_DIR` points the examples at any folder holding `Tibia.dat` and `Tibia.spr`, for installs from the Composer package, which has no `tests/data/`.
+
 ## [4321313] Install with composer require and leave tests out of the package (2026-10-10)
 
 ### Changed
