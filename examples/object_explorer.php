@@ -1,21 +1,28 @@
 <?php
 	require __DIR__ . '/config.php';
 
-	$formId = (int) ($_GET['id'] ?? 100);
-	$type = (int) ($_GET['type'] ?? 0);
+	use TibiaReader\ThingCategory;
 
 	$object = new TibiaReader\DatObject();
 
-	$thing = $object->get(TibiaReader\ThingCategory::tryFrom($type) ?? TibiaReader\ThingCategory::Item, $formId);
+	$category = ThingCategory::from(queryInt('type', ThingCategory::Item->value, 0, count(ThingCategory::cases()) - 1));
 
-	$selectedType = ['', '', '', ''];
-	if (isset($selectedType[$type])) {
-		$selectedType[$type] = 'selected="selected"';
-	}
+	[$minId, $maxId] = match ($category) {
+		ThingCategory::Item       => [100, $object->fileItems],
+		ThingCategory::Looktype   => [1, $object->fileLooktypes],
+		ThingCategory::Effect     => [1, $object->fileEffects],
+		ThingCategory::Projectile => [1, $object->fileProjectiles],
+	};
+
+	// An id outside the file shows the form again with a note instead of an error page
+	$formId = queryInt('id', $minId, 0, 0xFFFF);
+	$thing = ($formId >= $minId && $formId <= $maxId) ? $object->get($category, $formId) : null;
 ?>
 <!doctype html>
 <html>
 <head>
+	<meta charset="utf-8">
+	<title>Object explorer</title>
 	<style>
 		body {
 			padding: 0;
@@ -64,14 +71,18 @@
 		<form action="?" method="GET">
 			<input type="number" value="<?php print $formId; ?>" name="id">
 			<select name="type">
-				<option value="0" <?php print $selectedType[0]; ?>>item</option>
-				<option value="1" <?php print $selectedType[1]; ?>>looktype</option>
-				<option value="2" <?php print $selectedType[2]; ?>>effect</option>
-				<option value="3" <?php print $selectedType[3]; ?>>projectile</option>
+				<?php foreach (ThingCategory::cases() as $option) { ?>
+					<option value="<?php print $option->value; ?>"<?php print $option === $category ? ' selected' : ''; ?>><?php print $option->label(); ?></option>
+				<?php } ?>
 			</select>
 			<input type="submit" value="show">
 		</form>
 	</div>
+	<?php if ($thing === null) { ?>
+		<div id="objectProperties">
+			No <?php print $category->label(); ?> <?php print $formId; ?>. This file has <?php print $category->label(); ?> ids <?php print $minId; ?> to <?php print $maxId; ?>.
+		</div>
+	<?php } else { ?>
 	<div id="objectProperties">
 		<?php $object->printObjectInformation(); ?>
 	</div>
@@ -82,7 +93,7 @@
 				print 'Frame group: ' . $frameGroupType . ' <br>';
 				print '<div class="spritesContainer">';
 				foreach ($group->spriteIds as $index => $id) {
-					print '<img src="sprite.php?id=' . $id . '">';
+					print '<img src="sprite.php?id=' . $id . '" width="32" height="32" loading="lazy" alt="">';
 					if (($index + 1) % 16 == 0) {
 						print '<div style="clear: left"></div>';
 					}
@@ -92,5 +103,6 @@
 			}
 		?>
 	</div>
+	<?php } ?>
 </body>
 </html>
