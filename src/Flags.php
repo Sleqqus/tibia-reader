@@ -27,7 +27,7 @@ class Flags
 		'default_action' => [['action', 2]],
 	];
 
-	// 8.60 - 9.86 layout; the other layouts are derived from it in flagNames()
+	// 8.60 - 9.86 layout; the layouts from 7.55 on are derived from it in flagNames()
 	private const BASE_FLAGS = [
 		0  => 'ground',
 		1  => 'ground_border',
@@ -65,6 +65,40 @@ class Flags
 		33 => 'market',
 	];
 
+	// 7.40 - 7.50 layout: no ground border, multi use and force use swapped, light and others moved
+	// up front. 7.10 - 7.30 is the same up to byte 24, without the hangable and hook flags.
+	private const FLAGS_740 = [
+		0  => 'ground',
+		1  => 'on_bottom',
+		2  => 'on_top',
+		3  => 'container',
+		4  => 'stackable',
+		5  => 'multi_use',
+		6  => 'force_use',
+		7  => 'writable',
+		8  => 'writable_once',
+		9  => 'fluid_container',
+		10 => 'splash',
+		11 => 'not_walkable',
+		12 => 'not_moveable',
+		13 => 'block_projectile',
+		14 => 'not_pathable',
+		15 => 'pickupable',
+		16 => 'light',
+		17 => 'floor_change',
+		18 => 'full_ground',
+		19 => 'elevation',
+		20 => 'displacement',
+		22 => 'minimap_color',
+		23 => 'rotateable',
+		24 => 'lying_corpse',
+		25 => 'hangable',
+		26 => 'hook_south',
+		27 => 'hook_east',
+		28 => 'animate_always',
+		29 => 'lens_help',
+	];
+
 	/** @var array<int, array<int, string>> */
 	private static array $flagNamesCache = [];
 
@@ -76,6 +110,11 @@ class Flags
 		$name = self::flagNames($version)[$flagByte] ?? null;
 		if ($name === null) {
 			throw new \RuntimeException("Unknown flag {$flagByte} for client version {$version}.");
+		}
+
+		// Before 7.55 objects are always displaced by 8 pixels, so the flag stores no offset
+		if ($name === 'displacement' && !$version->hasDisplacementOffset()) {
+			return [$name, []];
 		}
 
 		return [$name, self::PARAMETERS[$name] ?? []];
@@ -91,24 +130,29 @@ class Flags
 	 */
 	public static function flagNames(ClientVersion $version): array
 	{
-		$v = $version->version;
+		$layout = $version->flagLayout();
 
-		return self::$flagNamesCache[$v] ??= match (true) {
+		return self::$flagNamesCache[$layout] ??= match ($layout) {
 			// 10.00+: byte 16 is "no move animation", the rest from 16 on shift up by one
-			$v >= 1000 => array_slice(self::BASE_FLAGS, 0, 16)
+			1000 => array_slice(self::BASE_FLAGS, 0, 16)
 				+ [16 => 'no_move_animation']
 				+ array_combine(range(17, 34), array_slice(self::BASE_FLAGS, 16, 18))
 				+ [35 => 'default_action', 36 => 'wrappable', 37 => 'unwrappable', 38 => 'top_effect', 254 => 'usable'],
 
-			$v >= 860 => self::BASE_FLAGS,
+			860 => self::BASE_FLAGS,
 
 			// 7.80 - 8.54: byte 8 is "chargeable", the rest from 8 on shift up by one; no cloth or market
-			$v >= 780 => array_slice(self::BASE_FLAGS, 0, 8)
+			780 => array_slice(self::BASE_FLAGS, 0, 8)
 				+ [8 => 'chargeable']
 				+ array_combine(range(9, 32), array_slice(self::BASE_FLAGS, 8, 24)),
 
 			// 7.55 - 7.72: like 8.60, but byte 23 is "floor change"; no cloth or market
-			default => array_replace(array_slice(self::BASE_FLAGS, 0, 32), [23 => 'floor_change']),
+			755 => array_replace(array_slice(self::BASE_FLAGS, 0, 32), [23 => 'floor_change']),
+
+			740 => self::FLAGS_740,
+
+			// 7.10 - 7.30: no hangable or hook flags, so the last two move down
+			default => array_slice(self::FLAGS_740, 0, 24, true) + [25 => 'animate_always', 26 => 'lens_help'],
 		};
 	}
 }

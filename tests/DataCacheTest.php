@@ -45,11 +45,11 @@ final class DataCacheTest extends TestCase
 	}
 
 	#[DataProviderExternal(ClientFiles::class, 'versions')]
-	public function testCachedMapMatchesTheFile(int $version): void
+	public function testCachedMapMatchesTheFile(int|string $key): void
 	{
-		$uncached = ClientFiles::client($version)->dat();
-		$built = $this->cachingClient($version)->dat();
-		$loaded = $this->cachingClient($version)->dat();
+		$uncached = ClientFiles::client($key, sprites: false)->dat();
+		$built = $this->cachingClient($key)->dat();
+		$loaded = $this->cachingClient($key)->dat();
 
 		$this->assertCount(1, $this->mapFiles());
 		$last = $uncached->objectsTotal;
@@ -62,40 +62,40 @@ final class DataCacheTest extends TestCase
 	}
 
 	#[DataProviderExternal(ClientFiles::class, 'versions')]
-	public function testTruncatedMapIsRebuilt(int $version): void
+	public function testTruncatedMapIsRebuilt(int|string $key): void
 	{
-		$this->cachingClient($version)->dat();
+		$this->cachingClient($key)->dat();
 		[$mapFile] = $this->mapFiles();
 		$fullMap = file_get_contents($mapFile);
 		file_put_contents($mapFile, substr($fullMap, 0, intdiv(strlen($fullMap), 2)));
 
-		$dat = $this->cachingClient($version)->dat();
+		$dat = $this->cachingClient($key)->dat();
 
 		$this->assertSame($fullMap, file_get_contents($mapFile));
 		$this->assertSame(
-			ClientFiles::client($version)->dat()->getObjectAddress($dat->objectsTotal),
+			ClientFiles::client($key, sprites: false)->dat()->getObjectAddress($dat->objectsTotal),
 			$dat->getObjectAddress($dat->objectsTotal)
 		);
 	}
 
 	#[DataProviderExternal(ClientFiles::class, 'versions')]
-	public function testCacheDirThatCantBeCreatedThrowsWhenSetExplicitly(int $version): void
+	public function testCacheDirThatCantBeCreatedThrowsWhenSetExplicitly(int|string $key): void
 	{
-		ClientFiles::require($version);
+		ClientFiles::require($key, sprites: false);
 		// A file where the directory should be
 		touch($this->cacheDir);
 
 		$this->expectException(\RuntimeException::class);
 		$this->expectExceptionMessage('Unable to create cache directory');
 
-		(new Client(ClientFiles::datPath($version), clientVersion: $version, dataCaching: true, cacheDir: $this->cacheDir . '/data'))->dat();
+		(new Client(ClientFiles::datPath($key), clientVersion: ClientFiles::version($key), dataCaching: true, cacheDir: $this->cacheDir . '/data'))->dat();
 	}
 
-	private function cachingClient(int $version): Client
+	private function cachingClient(int|string $key): Client
 	{
-		ClientFiles::require($version);
+		ClientFiles::require($key, sprites: false);
 
-		return new Client(ClientFiles::datPath($version), clientVersion: $version, dataCaching: true, cacheDir: $this->cacheDir);
+		return new Client(ClientFiles::datPath($key), clientVersion: ClientFiles::version($key), dataCaching: true, cacheDir: $this->cacheDir);
 	}
 
 	/**

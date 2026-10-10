@@ -10,7 +10,7 @@ namespace TibiaReader;
  * Create one per client version you work with. The readers are shared, so outfits and their
  * mounts reuse the same open files, offset map and decoded sprites.
  *
- *     $client = new Client('1084Tibia.dat', '1084Tibia.spr', dataCaching: true);
+ *     $client = new Client('1098Tibia.dat', '1098Tibia.spr', dataCaching: true);
  *     $client->dat()->getItem(2400);
  *     $client->looktype(128)->getFrame();
  */
@@ -19,6 +19,7 @@ final class Client
 	// Bumped when the format of the cached data file map changes, so old maps are never read
 	private const CACHE_FORMAT = 'v1';
 
+	/** The version passed in, if any. Detected versions are returned by version(). */
 	public readonly ?int $clientVersion;
 	public readonly string $dataCacheDir;
 
@@ -27,13 +28,18 @@ final class Client
 
 	private ?ClientVersion $version = null;
 	private bool $versionResolved = false;
+	private bool $versionGuessed = false;
+
+	/** @var array<string, ClientVersion|null> versions detected from the structure of a .dat file, by file key */
+	private static array $detectedVersions = [];
 
 	private ?DatObject $dat = null;
 	private ?Sprite $sprites = null;
 
 	/**
-	 * @param int|null $clientVersion version number such as 1084 for 10.84. Detected from the .dat file
-	 *        signature when omitted; set it for custom clients whose signature isn't recognized.
+	 * @param int|ClientVersion|null $clientVersion version number such as 1098 for 10.98. Detected from the
+	 *        .dat file when omitted. Pass a ClientVersion for custom clients that use features earlier than
+	 *        the official ones, e.g. new ClientVersion(860, extendedSprites: true).
 	 * @param bool $dataCaching store a map of object byte offsets in $cacheDir, for O(1) lookups on later requests
 	 * @param string|null $cacheDir where the data file map is stored; defaults to a tibia-reader folder in the
 	 *        system temp directory (see defaultCacheDir()). Set it to keep the map somewhere that outlives reboots.
@@ -41,7 +47,7 @@ final class Client
 	public function __construct(
 		public readonly ?string $dataFilePath = null,
 		public readonly ?string $spriteFilePath = null,
-		?int $clientVersion = null,
+		int|ClientVersion|null $clientVersion = null,
 		public readonly bool $dataCaching = false,
 		?string $cacheDir = null,
 	) {
@@ -52,7 +58,12 @@ final class Client
 			throw new \InvalidArgumentException('Specified sprite file does not exist.');
 		}
 
-		$this->clientVersion = $clientVersion === null ? null : (new ClientVersion($clientVersion))->version;
+		if (is_int($clientVersion)) {
+			$clientVersion = new ClientVersion($clientVersion);
+		}
+		$this->version = $clientVersion;
+		$this->versionResolved = $clientVersion !== null;
+		$this->clientVersion = $clientVersion?->version;
 		$this->usesDefaultCacheDir = $cacheDir === null;
 		$this->dataCacheDir = rtrim($cacheDir ?? self::defaultCacheDir() . 'data', '/\\') . DIRECTORY_SEPARATOR;
 	}
@@ -73,7 +84,7 @@ final class Client
 	 * The client version: the one passed in, or the one detected from the .dat file.
 	 * Null when there is neither.
 	 *
-	 * @throws \RuntimeException when the .dat file signature isn't recognized
+	 * @throws \RuntimeException when the .dat file is in none of the known formats
 	 */
 	public function version(): ?ClientVersion
 	{
@@ -81,8 +92,8 @@ final class Client
 
 		if ($version === null && $this->dataFilePath !== null) {
 			throw new \RuntimeException(
-				'Specified data file is not supported! If it belongs to a custom client, set its version explicitly '
-				. '(Config::setClientVersion() or the Client constructor).'
+				'Specified data file is not supported: its signature is unknown and it matches none of the known file formats. '
+				. 'If it belongs to a custom client, set its version explicitly (Config::setClientVersion() or the Client constructor).'
 			);
 		}
 
@@ -91,20 +102,56 @@ final class Client
 
 	/**
 	 * Like version(), but returns null instead of throwing for an unrecognized .dat file.
+	 *
+	 * A .dat file is recognized by its signature. Files with an unknown signature, such as builds
+	 * missing from the list or custom clients, are read as each known format in turn, newest first,
+	 * and get the newest version whose format reads the whole file.
 	 */
 	public function versionIfKnown(): ?ClientVersion
 	{
 		if (!$this->versionResolved) {
-			if ($this->clientVersion !== null) {
-				$this->version = new ClientVersion($this->clientVersion);
-			} elseif ($this->dataFilePath !== null) {
+			if ($this->dataFilePath !== null) {
 				$signature = (new FileReader($this->dataFilePath))->readInt32();
 				$this->version = ClientVersion::fromDatSignature($signature);
+				if ($this->version === null) {
+					$this->version = $this->detectVersionFromStructure();
+					$this->versionGuessed = $this->version !== null;
+				}
 			}
 			$this->versionResolved = true;
 		}
 
 		return $this->version;
+	}
+
+	/**
+	 * Whether the version was detected from the layout of the .dat file rather than set or recognized by
+	 * its signature. Such a version has the right file format, but may be newer than the actual client.
+	 */
+	public function versionIsGuessed(): bool
+	{
+		$this->versionIfKnown();
+
+		return $this->versionGuessed;
+	}
+
+	private function detectVersionFromStructure(): ?ClientVersion
+	{
+		$path = realpath($this->dataFilePath);
+		$key = $path . '|' . filesize($path) . '|' . filemtime($path);
+
+		if (!array_key_exists($key, self::$detectedVersions)) {
+			self::$detectedVersions[$key] = null;
+
+			foreach (ClientVersion::formatCandidates() as $candidate) {
+				if ((new self($path, clientVersion: $candidate))->dat()->readsWholeFile()) {
+					self::$detectedVersions[$key] = $candidate;
+					break;
+				}
+			}
+		}
+
+		return self::$detectedVersions[$key];
 	}
 
 	public function dat(): DatObject

@@ -3,9 +3,12 @@
 /*
  * Downloads the .dat and .spr files the tests run against into tests/data/<version>/.
  *
- *     php bin/download-test-data.php               all versions listed in tests/client-versions.php
- *     php bin/download-test-data.php 860 1098      only these versions
- *     php bin/download-test-data.php --force       download again even if the files are there
+ *     php bin/download-test-data.php                   everything listed in tests/client-versions.php
+ *     php bin/download-test-data.php 860 1098          only these versions
+ *     php bin/download-test-data.php converted-1287    a converted client, by its key
+ *     php bin/download-test-data.php --force           download again even if the files are there
+ *
+ * Everything together is about 9 GB.
  *
  * Also available as `composer test-data`.
  */
@@ -28,29 +31,30 @@ $sources = require __DIR__ . '/../tests/client-versions.php';
 
 $args = array_slice($argv, 1);
 $force = in_array('--force', $args, true);
-$requested = array_map('intval', array_diff($args, ['--force']));
+// Numeric keys are versions; PHP turns numeric array keys into integers too
+$requested = array_values(array_diff($args, ['--force']));
 
-foreach ($requested as $version) {
-	if (!array_key_exists($version, $sources)) {
-		fwrite(STDERR, "Version {$version} is not listed in tests/client-versions.php.\n");
+foreach ($requested as $key) {
+	if (!array_key_exists($key, $sources)) {
+		fwrite(STDERR, "{$key} is not listed in tests/client-versions.php.\n");
 		exit(1);
 	}
 }
 
 $failed = 0;
 
-foreach ($requested ?: array_keys($sources) as $version) {
-	$label = (string) new ClientVersion($version);
-	$targetDir = DATA_DIR . "/{$version}";
+foreach ($requested ?: array_keys($sources) as $key) {
+	$label = is_numeric($key) ? (string) new ClientVersion((int) $key) : $key;
+	$targetDir = DATA_DIR . "/{$key}";
 
 	if (!$force && is_file("{$targetDir}/Tibia.dat") && is_file("{$targetDir}/Tibia.spr")) {
 		echo "{$label}: already downloaded\n";
 		continue;
 	}
 
-	$url = $sources[$version];
+	$url = $sources[$key];
 	if ($url === null) {
-		echo "{$label}: no known download, put Tibia.dat and Tibia.spr into tests/data/{$version}/ to test it\n";
+		echo "{$label}: no known download, put Tibia.dat and Tibia.spr into tests/data/{$key}/ to test it\n";
 		continue;
 	}
 
@@ -72,7 +76,7 @@ foreach ($requested ?: array_keys($sources) as $version) {
 	$signature = (new FileReader("{$targetDir}/Tibia.dat"))->readInt32();
 	$detected = ClientVersion::fromDatSignature($signature);
 
-	if ($detected?->version === $version) {
+	if (!is_numeric($key) || $detected?->version === (int) $key) {
 		echo "{$label}: done\n";
 	} else {
 		echo "{$label}: done, but its .dat signature {$signature} is detected as " . ($detected ?? 'an unknown version') . "\n";
