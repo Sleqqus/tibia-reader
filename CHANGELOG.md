@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [bbae3a8] Run the examples against the downloaded client files (2026-10-10)
+
+### Changed
+
+- The examples read the client files from `tests/data/<version>/` through `examples/config.php`, 10.75 by default; the `TIBIA_VERSION` environment variable picks another downloaded version. They used to expect files in `examples/resources/`.
+- The outfit demo draws looktype 128 with mount 368, which exist in 10.75.
+
 ## [e089791] Add tests against real client files of every supported version (2026-10-10)
 
 ### Added
@@ -127,6 +134,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
+[bbae3a8]: https://github.com/Sleqqus/TibiaReader/commit/bbae3a88a1fc0c4883d00d487091c2c058aa5b71
 [e089791]: https://github.com/Sleqqus/TibiaReader/commit/e0897917234bb8a94e6762bd6594cc7d8539d9e2
 [9404524]: https://github.com/Sleqqus/TibiaReader/commit/9404524138587dfca04cf203753693be56b65e91
 [683573c]: https://github.com/Sleqqus/TibiaReader/commit/683573cb8afa0a8e78c2e981502559009b1aecae
