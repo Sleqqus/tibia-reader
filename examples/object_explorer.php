@@ -10,12 +10,7 @@
 
 	$object = new TibiaReader\DatObject();
 
-	switch ($type) {
-		case 1:  $object->getLooktype($formId); break;
-		case 2:  $object->getEffect($formId); break;
-		case 3:  $object->getProjectile($formId); break;
-		default: $object->getItem($formId); break;
-	}
+	$thing = $object->get(TibiaReader\ThingCategory::tryFrom($type) ?? TibiaReader\ThingCategory::Item, $formId);
 
 	$selectedType = ['', '', '', ''];
 	if (isset($selectedType[$type])) {
@@ -67,7 +62,7 @@
 </head>
 <body>
 	<div id="information">
-		<pre>Items: <?php print $object->fileItems; ?>, Looktypes: <?php print $object->fileLooktypes; ?>, Effects: <?php print $object->fileEffects; ?>, Projectiles: <?php print $object->fileProjectiles; ?></pre>
+		<pre>Client <?php print $object->version(); ?>. Items: <?php print $object->fileItems; ?>, Looktypes: <?php print $object->fileLooktypes; ?>, Effects: <?php print $object->fileEffects; ?>, Projectiles: <?php print $object->fileProjectiles; ?></pre>
 	</div>
 	<div id="navigation">
 		<form action="?" method="GET">
@@ -86,15 +81,11 @@
 	</div>
 	<div id="objectSprites">
 		<?php
-			$frameGroups = $object->object['frameGroups'] ?? [null => $object->object];
-
-			foreach ($frameGroups as $frameGroup => $group) {
+			foreach ($thing->frameGroups as $frameGroupType => $group) {
 				print '<div class="frameGroup">';
-				if ($frameGroup !== null) {
-					print 'Framegroup: ' . $frameGroup . ' <br>';
-				}
+				print 'Frame group: ' . $frameGroupType . ' <br>';
 				print '<div class="spritesContainer">';
-				foreach ($group['spriteIds'] as $index => $id) {
+				foreach ($group->spriteIds as $index => $id) {
 					print '<img src="sprite.php?id=' . $id . '">';
 					if (($index + 1) % 16 == 0) {
 						print '<div style="clear: left"></div>';
