@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [4ea9c47] Document TIBIA_CLIENT_DIR for the examples in the README (2026-10-10)
+
+### Changed
+
+- The README explains how to run the examples from an installed package with `TIBIA_CLIENT_DIR`, and that they only run from the command line or PHP's built-in server.
+
 ## [c6306fb] Harden and fix the examples (2026-10-10)
 
 ### Security
@@ -160,6 +166,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
+[4ea9c47]: https://github.com/Sleqqus/TibiaReader/commit/4ea9c475c5e63be40daa0e8d0159cb298fd21d06
+[c6306fb]: https://github.com/Sleqqus/TibiaReader/commit/c6306fb38058e0ff2df0fbd59d88f7a2e8926ab3
 [4321313]: https://github.com/Sleqqus/TibiaReader/commit/43213134dff54ccec45410b0a03aade2d1816fae
 [bbae3a8]: https://github.com/Sleqqus/TibiaReader/commit/bbae3a88a1fc0c4883d00d487091c2c058aa5b71
 [e089791]: https://github.com/Sleqqus/TibiaReader/commit/e0897917234bb8a94e6762bd6594cc7d8539d9e2
