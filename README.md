@@ -88,6 +88,18 @@ Versions 7.55 to 10.99 are accepted.
 
 Browsable demos live in [examples/](examples/) (`sprite_browser.php`, `object_explorer.php`) — drop your client files into `examples/resources/` first.
 
+## Tests
+
+The tests read real client files of every version whose `.dat` signature is recognized (see [tests/client-versions.php](tests/client-versions.php)). The files aren't committed; download them into `tests/data/` (ignored by git) first:
+
+```sh
+composer install
+composer test-data           # or: php bin/download-test-data.php 760 1050
+composer test
+```
+
+The files come from the [downloads.ots.me](https://downloads.ots.me/?dir=data/tibia-clients/dat_and_spr) client archive. Versions it doesn't have (8.10, 9.85, 10.72, 10.84) are skipped until you put their `Tibia.dat` and `Tibia.spr` into `tests/data/<version>/`, e.g. `tests/data/1084/`. `composer test -- --display-skipped` lists what was skipped.
+
 ## Notes
 
 - Supported `.dat` signatures are listed in [src/ClientVersion.php](src/ClientVersion.php). Flag names follow OTClient's naming and are listed in [src/Flags.php](src/Flags.php).
