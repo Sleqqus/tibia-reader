@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [4321313] Install with composer require and leave tests out of the package (2026-10-10)
+
+### Changed
+
+- The README shows `composer require sleqq/tibia-reader` and how to install from GitHub through a `vcs` repository, instead of `composer install`.
+- `tests/`, `bin/` and `phpunit.xml.dist` are left out of the package Composer downloads for a tagged release.
+
 ## [bbae3a8] Run the examples against the downloaded client files (2026-10-10)
 
 ### Changed
@@ -134,6 +141,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
+[4321313]: https://github.com/Sleqqus/TibiaReader/commit/43213134dff54ccec45410b0a03aade2d1816fae
 [bbae3a8]: https://github.com/Sleqqus/TibiaReader/commit/bbae3a88a1fc0c4883d00d487091c2c058aa5b71
 [e089791]: https://github.com/Sleqqus/TibiaReader/commit/e0897917234bb8a94e6762bd6594cc7d8539d9e2
 [9404524]: https://github.com/Sleqqus/TibiaReader/commit/9404524138587dfca04cf203753693be56b65e91
