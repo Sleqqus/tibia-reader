@@ -4,6 +4,24 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [4264b0f] Support every client version with Tibia.dat and Tibia.spr (2026-10-10)
+
+### Added
+
+- Clients 7.10 to 7.50 and 11.00 are read, so every client that ships `Tibia.dat` and `Tibia.spr` is supported, 7.10 to 11.00. 7.10 - 7.30 and 7.40 - 7.50 have flag layouts of their own, and before 7.55 objects have no third pattern dimension and the displacement flag stores no offset (`flag('displacement')` is empty).
+- `.dat` signatures of 118 versions, 94 of them checked against the real files of Gesior's client archive. The rest come from ObjectBuilder's version list.
+- A `.dat` file with an unknown signature (a build missing from the list, a custom client, or a file converted back to `.dat`/`.spr` from a 12.x or newer client) is read as each known file format in turn, newest first, and gets the newest version whose format reads the whole file. `Client::versionIsGuessed()` tells when that happened. Before, such files threw unless their version was set.
+- `ClientVersion` takes `extendedSprites` and `frameDurations` for custom clients that use 32-bit sprite ids or frame durations before 9.60 and 10.50. `Client` and `Config::setClientVersion()` accept such a `ClientVersion` as well as a version number.
+- `ClientVersion::LATEST` (11.00) and `ClientVersion::latest()`, the newest supported version.
+- The tests and `bin/download-test-data.php` cover every version with known files and the converted 12.x to 15.x files of the archive, about 9 GB in all. A version's `.dat` tests run without its `.spr` file.
+
+### Changed
+
+- The examples default to the newest version, 11.00, instead of 10.75.
+- Versions that share their files are detected as the newest of them: the 7.60/7.70/7.72 files as 7.72 (was 7.60), and 10.97/10.98 as 10.98. The format they are read with is the same.
+- Whether a `.spr` file stores a 2- or 4-byte sprite count is told from the file's layout instead of its signature, so custom clients with extended sprites and converted files are read without setting a version.
+- Versions 7.10 to 11.00 are accepted, instead of 7.55 to 10.99.
+
 ## [f94efc0] Point repository links at Sleqqus/tibia-reader (2026-10-10)
 
 ### Changed
@@ -189,6 +207,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
+[4264b0f]: https://github.com/Sleqqus/tibia-reader/commit/4264b0f7da92eb3f660bd888f9802e8dbc78ac5f
 [f94efc0]: https://github.com/Sleqqus/tibia-reader/commit/f94efc02a71fe42983ec172f978a262476dd36a2
 [0bd8ae5]: https://github.com/Sleqqus/tibia-reader/commit/0bd8ae574e09f249aa8abbe65c7b005297b4a1ba
 [4ea9c47]: https://github.com/Sleqqus/tibia-reader/commit/4ea9c475c5e63be40daa0e8d0159cb298fd21d06

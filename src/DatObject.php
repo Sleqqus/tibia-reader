@@ -63,7 +63,7 @@ class DatObject
 		$this->version = $this->client->version();
 		$this->readFileMetadata();
 
-		// Tibia 9.60 and newer uses 4-byte sprite ids instead of 2
+		// Tibia 9.60 and newer, and custom clients with extended sprites, use 4-byte sprite ids instead of 2
 		$this->spriteIdSize = $this->version->hasExtendedSprites() ? 4 : 2;
 
 		foreach (Flags::flagNames($this->version) as $flagByte => $name) {
@@ -157,7 +157,7 @@ class DatObject
 		$height = $this->fileHandle->readByte();
 		$exactSize = ($width * $height > 1) ? $this->fileHandle->readByte() : null;
 
-		[, $layers, $patternX, $patternY, $patternZ, $phases] = unpack('C5', $this->fileHandle->readText(5));
+		[$layers, $patternX, $patternY, $patternZ, $phases] = $this->readPatterns($this->fileHandle);
 
 		$animation = null;
 		if ($phases > 1 && $this->version->hasEnhancedAnimations()) {
@@ -178,6 +178,22 @@ class DatObject
 		$spriteIds = $spriteCount > 0 ? array_values(unpack($this->spriteIdSize === 4 ? 'V*' : 'v*', $spriteData)) : [];
 
 		return new FrameGroup($width, $height, $exactSize, $layers, $patternX, $patternY, $patternZ, $phases, $animation, $spriteIds);
+	}
+
+	/**
+	 * Layers, the three pattern dimensions and the animation phases. Before 7.55 there is no z pattern.
+	 *
+	 * @return array{int, int, int, int, int}
+	 */
+	private function readPatterns(FileReader $file): array
+	{
+		if ($this->version->hasPatternZ()) {
+			return array_values(unpack('C5', $file->readText(5)));
+		}
+
+		[, $layers, $patternX, $patternY, $phases] = unpack('C4', $file->readText(4));
+
+		return [$layers, $patternX, $patternY, 1, $phases];
 	}
 
 	private function readObject(int $objectIndex): ThingType
@@ -229,7 +245,7 @@ class DatObject
 				$file->forward(1);
 			}
 
-			[, $layers, $patternX, $patternY, $patternZ, $phases] = unpack('C5', $file->readText(5));
+			[$layers, $patternX, $patternY, $patternZ, $phases] = $this->readPatterns($file);
 
 			if ($phases > 1 && $this->version->hasEnhancedAnimations()) {
 				// type, loop count, start phase, then min/max duration per phase
@@ -299,6 +315,23 @@ class DatObject
 		}
 
 		return $fileMap;
+	}
+
+	/**
+	 * Whether every object can be read with this version's format and the last one ends where the file
+	 * does. Used to tell the format of files with an unknown signature.
+	 */
+	public function readsWholeFile(): bool
+	{
+		if ($this->fileItems < 100 || $this->objectsTotal < 0) {
+			return false;
+		}
+
+		try {
+			return $this->getObjectAddress($this->objectsTotal + 1) === filesize($this->client->dataFilePath);
+		} catch (\RuntimeException) {
+			return false;
+		}
 	}
 
 	public function getObjectAddress(int $objectIndex): int

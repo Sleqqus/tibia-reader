@@ -1,6 +1,6 @@
 {
     "name": "sleqq/tibia-reader",
-    "description": "Reader for Tibia client .dat and .spr files (versions 7.60-10.84): sprite extraction, object parsing and outfit rendering.",
+    "description": "Reader for Tibia client .dat and .spr files (all versions with Tibia.dat and Tibia.spr, 7.10-11.00): sprite extraction, object parsing and outfit rendering.",
     "type": "library",
     "keywords": ["tibia", "spr", "dat", "sprites", "outfits"],
     "license": "MIT",

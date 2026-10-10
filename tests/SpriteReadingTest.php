@@ -16,21 +16,20 @@ use TibiaReader\Sprite;
  */
 final class SpriteReadingTest extends TestCase
 {
-	private const GOLD_COIN = 3031;
 	private const CITIZEN_OUTFIT = 128;
 
 	// Sprites decoded per version, spread evenly over the file
 	private const SAMPLE_SIZE = 500;
 
 	#[DataProviderExternal(ClientFiles::class, 'versions')]
-	public function testSpriteFileMatchesDetectedVersionWithoutWarning(int $version): void
+	public function testSpriteFileMatchesDetectedVersionWithoutWarning(int|string $key): void
 	{
-		ClientFiles::require($version);
+		ClientFiles::require($key);
 
-		// Loaded the way users do: the version detected from the .dat file, the sprite count size guessed from the .spr signature
-		$client = new Client(ClientFiles::datPath($version), ClientFiles::sprPath($version));
+		// Loaded the way users do: the version detected from the .dat file, the sprite count size told from the .spr layout
+		$client = new Client(ClientFiles::datPath($key), ClientFiles::sprPath($key));
 		if ($client->versionIfKnown() === null) {
-			$this->markTestSkipped('The .dat signature is not recognized (see DatReadingTest).');
+			$this->markTestSkipped('The .dat file is not recognized (see DatReadingTest).');
 		}
 
 		$warnings = [];
@@ -46,28 +45,42 @@ final class SpriteReadingTest extends TestCase
 		}
 
 		$this->assertSame([], $warnings);
-		$this->assertSame(ClientFiles::client($version)->sprites()->spritesCount, $spritesCount);
+		$this->assertSame(ClientFiles::client($key)->sprites()->spritesCount, $spritesCount);
+	}
+
+	/**
+	 * Without a .dat file the size of the sprite count is told from the layout of the .spr file alone.
+	 */
+	#[DataProviderExternal(ClientFiles::class, 'versions')]
+	public function testSpriteCountIsReadWithoutDataFile(int|string $key): void
+	{
+		ClientFiles::require($key);
+
+		$this->assertSame(
+			ClientFiles::client($key)->sprites()->spritesCount,
+			(new Client(spriteFilePath: ClientFiles::sprPath($key)))->sprites()->spritesCount
+		);
 	}
 
 	#[DataProviderExternal(ClientFiles::class, 'versions')]
-	public function testDataFileOnlyUsesExistingSprites(int $version): void
+	public function testDataFileOnlyUsesExistingSprites(int|string $key): void
 	{
-		$sprites = ClientFiles::client($version)->sprites();
+		$sprites = ClientFiles::client($key)->sprites();
 
 		$this->assertGreaterThan(1000, $sprites->spritesCount);
-		$this->assertLessThanOrEqual($sprites->spritesCount, ClientFiles::stats($version)['maxSpriteId']);
+		$this->assertLessThanOrEqual($sprites->spritesCount, ClientFiles::stats($key)['maxSpriteId']);
 	}
 
 	#[DataProviderExternal(ClientFiles::class, 'versions')]
-	public function testSpriteAddressesPointInsideTheFile(int $version): void
+	public function testSpriteAddressesPointInsideTheFile(int|string $key): void
 	{
-		$client = ClientFiles::client($version);
+		$client = ClientFiles::client($key);
 		$count = $client->sprites()->spritesCount;
-		$fileSize = filesize(ClientFiles::sprPath($version));
+		$fileSize = filesize(ClientFiles::sprPath($key));
 
 		// Header: signature, then the sprite count in 2 or 4 bytes, then one 4-byte address per sprite
 		$tableStart = 4 + ($client->version()->hasExtendedSprites() ? 4 : 2);
-		$file = new FileReader(ClientFiles::sprPath($version));
+		$file = new FileReader(ClientFiles::sprPath($key));
 		$addresses = array_values(unpack('V*', $file->jump($tableStart)->readText($count * 4)));
 
 		$outside = [];
@@ -83,9 +96,9 @@ final class SpriteReadingTest extends TestCase
 	}
 
 	#[DataProviderExternal(ClientFiles::class, 'versions')]
-	public function testSpritesDecode(int $version): void
+	public function testSpritesDecode(int|string $key): void
 	{
-		$sprites = ClientFiles::client($version)->sprites();
+		$sprites = ClientFiles::client($key)->sprites();
 		$count = $sprites->spritesCount;
 
 		$ids = array_unique([1, ...range(1, $count, max(1, intdiv($count, self::SAMPLE_SIZE))), $count]);
@@ -96,18 +109,18 @@ final class SpriteReadingTest extends TestCase
 	}
 
 	#[DataProviderExternal(ClientFiles::class, 'versions')]
-	public function testItemSpriteHasPixels(int $version): void
+	public function testItemSpriteHasPixels(int|string $key): void
 	{
-		$client = ClientFiles::client($version);
-		$spriteId = $client->dat()->getItem(self::GOLD_COIN)->frameGroup()->spriteIds[0];
+		$client = ClientFiles::client($key);
+		$spriteId = $client->dat()->getItem(ClientFiles::knownItems($key)[1])->frameGroup()->spriteIds[0];
 
 		$this->assertGreaterThan(0, self::countOpaquePixels($client->sprites()->getSprite($spriteId)));
 	}
 
 	#[DataProviderExternal(ClientFiles::class, 'versions')]
-	public function testOutfitRenders(int $version): void
+	public function testOutfitRenders(int|string $key): void
 	{
-		$frame = ClientFiles::client($version)->looktype(self::CITIZEN_OUTFIT)->setColors(10, 20, 30, 40)->getFrame();
+		$frame = ClientFiles::client($key)->looktype(self::CITIZEN_OUTFIT)->setColors(10, 20, 30, 40)->getFrame();
 
 		$this->assertGreaterThanOrEqual(32, imagesx($frame));
 		$this->assertGreaterThan(0, self::countOpaquePixels($frame));

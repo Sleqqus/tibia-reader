@@ -12,7 +12,7 @@ class Config
 {
 	public static ?string $dataFilePath = null;
 	public static ?string $spriteFilePath = null;
-	public static ?int $clientVersion = null;
+	public static int|ClientVersion|null $clientVersion = null;
 	/** Cache root; data/ inside it holds the data file map. Defaults to Client::defaultCacheDir(). */
 	public static ?string $mainCacheDir = null;
 
@@ -45,12 +45,13 @@ class Config
 	}
 
 	/**
-	 * Sets the client version (e.g. 1084 for 10.84) instead of detecting it from the .dat file signature.
-	 * Needed for custom clients whose signature isn't recognized. Null restores detection.
+	 * Sets the client version (e.g. 1098 for 10.98) instead of detecting it from the .dat file. Pass a
+	 * ClientVersion for custom clients that use features earlier than the official ones, e.g.
+	 * new ClientVersion(860, extendedSprites: true). Null restores detection.
 	 */
-	public static function setClientVersion(?int $version): void
+	public static function setClientVersion(int|ClientVersion|null $version): void
 	{
-		self::$clientVersion = $version === null ? null : (new ClientVersion($version))->version;
+		self::$clientVersion = is_int($version) ? (new ClientVersion($version))->version : $version;
 	}
 
 	public static function setDataCaching(bool $mapping): void

@@ -46,27 +46,54 @@ class Sprite
 
 		$this->fileSignature = $this->fileHandle->jump(0)->readInt32();
 		$this->spritesCountSize = $this->usesExtendedCount($client) ? 4 : 2;
-		$this->spritesCount = $this->fileHandle->readBytes($this->spritesCountSize);
+		$this->spritesCount = $this->fileHandle->jump(4)->readBytes($this->spritesCountSize);
 	}
 
 	private function usesExtendedCount(Client $client): bool
 	{
-		$extendedBySignature = ClientVersion::sprSignatureIsExtended($this->fileSignature);
-
-		// An explicitly set version wins, since custom clients may use any signature
+		// An explicitly set version wins, since custom clients may lay out their files any way
 		if ($client->clientVersion !== null) {
 			return $client->versionIfKnown()->hasExtendedSprites();
 		}
 
+		$extendedByLayout = $this->countLayoutIsExtended() ?? ClientVersion::sprSignatureIsExtended($this->fileSignature);
+
 		$datVersion = $client->versionIfKnown();
-		if ($datVersion !== null && $datVersion->hasExtendedSprites() !== $extendedBySignature) {
+		if ($datVersion !== null && $datVersion->hasExtendedSprites() !== $extendedByLayout) {
 			trigger_error(
 				"The sprite file looks like it belongs to a different client version than the data file ({$datVersion}).",
 				E_USER_WARNING
 			);
 		}
 
-		return $extendedBySignature;
+		return $extendedByLayout;
+	}
+
+	/**
+	 * Tells from the file itself whether the sprite count takes 4 bytes (9.60+ and extended custom
+	 * clients) or 2: only with the right size does the address table fit the file and point past its
+	 * own end. Null when neither or both fit.
+	 */
+	private function countLayoutIsExtended(): ?bool
+	{
+		$fileSize = filesize($this->spriteFilePath);
+		$fits = [];
+
+		foreach ([4, 2] as $countSize) {
+			$count = $this->fileHandle->jump(4)->readBytes($countSize);
+			$tableEnd = 4 + $countSize + $count * 4;
+			if ($count === 0 || $tableEnd > $fileSize) {
+				continue;
+			}
+
+			$sample = array_filter(unpack('V*', $this->fileHandle->readText(min($count, 64) * 4)));
+			$outside = array_filter($sample, static fn (int $address) => $address < $tableEnd || $address >= $fileSize);
+			if ($sample !== [] && $outside === []) {
+				$fits[] = $countSize === 4;
+			}
+		}
+
+		return count($fits) === 1 ? $fits[0] : null;
 	}
 
 	/**

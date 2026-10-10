@@ -5,7 +5,7 @@
 	 * from this folder:
 	 *
 	 *     php -S localhost:8000                     # http://localhost:8000/object_explorer.php
-	 *     TIBIA_VERSION=860 php -S localhost:8000   # another downloaded version
+	 *     TIBIA_VERSION=860 php -S localhost:8000   # another downloaded version (the newest by default)
 	 *
 	 * The Composer package has no tests/ folder, so there point TIBIA_CLIENT_DIR at any folder
 	 * holding Tibia.dat and Tibia.spr:
@@ -74,7 +74,7 @@
 		$clientDir = rtrim(getenv('TIBIA_CLIENT_DIR'), '/\\');
 		$missingFilesHelp = 'No Tibia.dat and Tibia.spr in the TIBIA_CLIENT_DIR folder.';
 	} else {
-		$clientVersion = (int) (getenv('TIBIA_VERSION') ?: 1075);
+		$clientVersion = (int) (getenv('TIBIA_VERSION') ?: TibiaReader\ClientVersion::LATEST);
 		$clientDir = __DIR__ . "/../tests/data/{$clientVersion}";
 		$missingFilesHelp = "No client files in tests/data/{$clientVersion}/. Run `php bin/download-test-data.php {$clientVersion}` first,"
 			. ' or set TIBIA_CLIENT_DIR to a folder holding Tibia.dat and Tibia.spr.';
