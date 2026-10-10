@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [e089791] Add tests against real client files of every supported version (2026-10-10)
+
+### Added
+
+- PHPUnit tests that read the real `.dat` and `.spr` files of every version with a recognized signature: version detection, parsing every object up to the end of the file, flag names and values, known items, outfit and projectile patterns, animations and frame groups, the sprite address table, sprite decoding and outfit rendering. Run them with `composer test`.
+- `bin/download-test-data.php` (`composer test-data`) downloads the client files into `tests/data/`, which git ignores. 8.10, 9.85, 10.72 and 10.84 have no known download and are skipped until their files are added by hand.
+
 ## [9404524] Add Client and typed objects; name flags; speed up reading (2026-10-10)
 
 ### Added
@@ -120,6 +127,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - All files use LF line endings, enforced by `.gitattributes`. Several files previously used CRLF or classic Mac (CR-only) line endings.
 
+[e089791]: https://github.com/Sleqqus/TibiaReader/commit/e0897917234bb8a94e6762bd6594cc7d8539d9e2
 [9404524]: https://github.com/Sleqqus/TibiaReader/commit/9404524138587dfca04cf203753693be56b65e91
 [683573c]: https://github.com/Sleqqus/TibiaReader/commit/683573cb8afa0a8e78c2e981502559009b1aecae
 [ac91107]: https://github.com/Sleqqus/TibiaReader/commit/ac911076e86d5ae0bf315e7b817ea1359d0fc6df
