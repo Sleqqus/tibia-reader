@@ -168,7 +168,7 @@ class Sprite
 
 	public function printFileInformation(): void
 	{
-		print 'Sprite file name: ' . basename($this->spriteFilePath) . '<br>';
+		print 'Sprite file name: ' . htmlspecialchars(basename($this->spriteFilePath)) . '<br>';
 		print 'Sprites: ' . $this->spritesCount . '<br>';
 	}
 }
