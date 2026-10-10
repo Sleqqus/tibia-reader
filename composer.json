@@ -3,6 +3,7 @@
     "description": "Reader for Tibia client .dat and .spr files (versions 7.60-10.84): sprite extraction, object parsing and outfit rendering.",
     "type": "library",
     "keywords": ["tibia", "spr", "dat", "sprites", "outfits"],
+    "license": "MIT",
     "require": {
         "php": ">=8.1",
         "ext-gd": "*"
