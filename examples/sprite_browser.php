@@ -1,45 +1,35 @@
 <?php
-	if (!isset($_GET['page'])) {
-		header("Location: ?page=1");
-		exit;
-	}
+	require __DIR__ . '/config.php';
 
-	$page = (int) $_GET['page'];
+	$sprites = new TibiaReader\Sprite();
 
 	$spritesPerPage = 300;
-	
-	$begin = 1+(($page-1)*$spritesPerPage);
-	$end = $spritesPerPage + (($page-1)*$spritesPerPage);
-	
-	$prevPageId = ($page > 1) ? $page-1 : 1;
-	$nextPageId = $page+1;
+	$lastPage = max(1, (int) ceil($sprites->spritesCount / $spritesPerPage));
 
-	$nextPage = [
-		"begin" => (($nextPageId-1) * $spritesPerPage) + 1,
-		"end" => (($nextPageId-1) * $spritesPerPage) + $spritesPerPage
+	$page = queryInt('page', 1, 1, $lastPage);
+
+	// First and last sprite id on a page
+	$pageRange = static fn (int $page): array => [
+		($page - 1) * $spritesPerPage + 1,
+		min($page * $spritesPerPage, $sprites->spritesCount),
 	];
 
-	$prevPage = [
-		"begin" => (($prevPageId-1) * $spritesPerPage) + 1,
-		"end" => (($prevPageId-1) * $spritesPerPage) + $spritesPerPage
-	];
-
-
-
+	[$begin, $end] = $pageRange($page);
 ?>
-<!doctype HTML>
+<!doctype html>
 <html>
 <head>
+	<meta charset="utf-8">
+	<title>Sprite browser</title>
 	<style>
-		body {
-			/*background: red;*/
-		}
 		#navigation {
 			text-align: center;
 			margin-bottom: 10px;
 			width: 100%;
 			background: lightblue;
 			padding: 4px 0;
+			font: normal 14px "Arial";
+			color: rgb(80, 80, 80);
 		}
 		#navigation span{
 			margin: 0 10px;
@@ -47,11 +37,9 @@
 		#navigation a{
 			text-decoration: none;
 			color: rgb(80, 80, 80);
-			font: normal 14px "Arial";
 		}
 		#navigation a:hover {
 			color: rgb(0, 0, 0);
-
 		}
 
 		#sprites {
@@ -61,7 +49,6 @@
 		}
 
 		.spritea {
-			margin: 0;
 			display: inline-block;
 			margin: -1px 0 0 -1px;
 			border: 1px solid #fff;
@@ -74,17 +61,23 @@
 </head>
 <body>
 	<div id="navigation">
-		<a href="?page=<?php echo $prevPageId; ?>">Prev (<?php echo $prevPage["begin"]."-".$prevPage["end"]; ?>)</a>
-		<span>|</span>
-		<a href="?page=<?php echo $nextPageId; ?>">Next (<?php echo $nextPage["begin"]."-".$nextPage["end"]; ?>)</a>
+		<?php if ($page > 1) { ?>
+			<a href="?page=<?php echo $page - 1; ?>">Prev (<?php echo implode('-', $pageRange($page - 1)); ?>)</a>
+			<span>|</span>
+		<?php } ?>
+		Sprites <?php echo $begin; ?>-<?php echo $end; ?> of <?php echo $sprites->spritesCount; ?>
+		<?php if ($page < $lastPage) { ?>
+			<span>|</span>
+			<a href="?page=<?php echo $page + 1; ?>">Next (<?php echo implode('-', $pageRange($page + 1)); ?>)</a>
+		<?php } ?>
 	</div>
 
 	<div id="sprites">
 		<?php
 			for ($sprite = $begin; $sprite <= $end; $sprite++) {
-				echo '<div class="spritea"><img src="sprite.php?id='.$sprite.'"/></div>';
-				if (($sprite%20) == 0) {
-					echo "<br/>";
+				echo '<div class="spritea"><img src="sprite.php?id=' . $sprite . '" width="32" height="32" loading="lazy" alt="' . $sprite . '" title="' . $sprite . '"></div>';
+				if (($sprite % 20) == 0) {
+					echo "<br>";
 				}
 			}
 		?>

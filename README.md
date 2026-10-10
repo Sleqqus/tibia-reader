@@ -94,12 +94,18 @@ $client = new Client('custom.dat', 'custom.spr', clientVersion: 1098);
 
 Versions 7.55 to 10.99 are accepted.
 
-Browsable demos live in [examples/](examples/) (`sprite_browser.php`, `object_explorer.php`). They read the client files `composer test-data` downloads, 10.75 by default:
+Browsable demos live in [examples/](examples/) (`sprite_browser.php`, `object_explorer.php`). They run only from the command line or PHP's built-in server, never under another web server. In a clone of this repository they read the client files `composer test-data` downloads, 10.75 by default:
 
 ```sh
 cd examples
 php -S localhost:8000                     # http://localhost:8000/object_explorer.php
 TIBIA_VERSION=854 php -S localhost:8000   # any other version in tests/data/
+```
+
+The installed Composer package has no `tests/data/`, so point `TIBIA_CLIENT_DIR` at a folder holding `Tibia.dat` and `Tibia.spr`:
+
+```sh
+TIBIA_CLIENT_DIR=/path/to/client php -S localhost:8000 -t vendor/sleqq/tibia-reader/examples
 ```
 
 ## Tests

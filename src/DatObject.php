@@ -420,14 +420,13 @@ class DatObject
 	public function printObjectInformation(): void
 	{
 		print 'Object ID: ' . $this->objectId . ' (file index: ' . $this->objectIndexInFile . ', starting at byte: ' . $this->objectAddress . ')';
-		print '<pre>';
-		print_r($this->object);
-		print '</pre>';
+		// Text flags such as the market name come from the file, so they're escaped
+		print '<pre>' . htmlspecialchars(print_r($this->object, true)) . '</pre>';
 	}
 
 	public function printFileInformation(): void
 	{
-		print 'Data file name: ' . basename($this->client->dataFilePath) . '<br>';
+		print 'Data file name: ' . htmlspecialchars(basename($this->client->dataFilePath)) . '<br>';
 		print 'Client version: ' . $this->version . '<br>';
 		print 'File Signature: ' . $this->fileSignature . '<br>';
 		print 'Items: ' . $this->fileItems . '<br>';
