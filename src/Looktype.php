@@ -49,6 +49,7 @@ class Looktype
 
 	private int $looktypeDirection = self::DIRECTION_SOUTH;
 	private int $looktypeStep = 0;
+	private int $looktypeIdlePhase = 0;
 
 	/**
 	 * @param Client|null $client the client files to read; defaults to the ones set in Config
@@ -96,6 +97,53 @@ class Looktype
 		$this->looktypeStep = $step;
 
 		return $this;
+	}
+
+	/**
+	 * Phase of the standing animation drawn at step 0, from 0 to idlePhases() - 1.
+	 */
+	public function setIdlePhase(int $phase): static
+	{
+		$this->looktypeIdlePhase = $phase;
+
+		return $this;
+	}
+
+	/**
+	 * Number of phases the looktype cycles through while standing still; 1 when it doesn't animate.
+	 *
+	 * With frame groups (10.57+) that is the idle group's phases. A looktype with a single group, and
+	 * every looktype of older clients, only animates while standing when it has the animate_always flag.
+	 */
+	public function idlePhases(): int
+	{
+		$frameGroup = $this->looktype->frameGroup(FrameGroup::IDLE);
+
+		if ($this->client->version()->hasFrameGroups() && count($this->looktype->frameGroups) > 1) {
+			return $frameGroup->phases;
+		}
+
+		return $this->looktype->hasFlag('animate_always') ? $frameGroup->phases : 1;
+	}
+
+	/**
+	 * Duration of each standing animation phase in milliseconds.
+	 *
+	 * Uses the durations stored in the .dat (10.50+, the average of min and max; a phase can be 0). Older clients store
+	 * none, so a full cycle takes a second, like OTClient draws animate_always creatures.
+	 *
+	 * @return list<int>
+	 */
+	public function idleDurations(): array
+	{
+		$phases = $this->idlePhases();
+		$durations = $this->looktype->frameGroup(FrameGroup::IDLE)->animation?->durations ?? [];
+
+		if (count($durations) < $phases) {
+			return array_fill(0, $phases, intdiv(1000, $phases));
+		}
+
+		return array_map(static fn (array $d) => intdiv($d['min'] + $d['max'], 2), array_slice($durations, 0, $phases));
 	}
 
 	public function setDirection(int $direction): static
@@ -157,10 +205,10 @@ class Looktype
 
 			// Step 0 is the idle frame group; moving steps live in the second group
 			$frameGroup = $this->looktype->frameGroup(($multipleFrameGroups && $step !== 0) ? FrameGroup::MOVING : FrameGroup::IDLE);
-			$targetStep = ($step === 0) ? 0 : ($step - 1);
+			$targetStep = ($step === 0) ? $this->looktypeIdlePhase : ($step - 1);
 		} else {
 			$frameGroup = $this->looktype->frameGroup();
-			$targetStep = $step;
+			$targetStep = ($step === 0) ? $this->looktypeIdlePhase : $step;
 		}
 
 		$frame = self::createBlankImage($frameGroup->width, $frameGroup->height);
