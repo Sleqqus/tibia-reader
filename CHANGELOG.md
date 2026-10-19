@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), with changes grouped by the commit that made them instead of by version, newest first. A commit can't contain its own hash, so each section is written in a later commit.
 
+## [d41858d] Draw standing animations of looktypes (2026-10-19)
+
+### Added
+
+- `Looktype::setIdlePhase()` picks the phase of the standing animation drawn at step 0, so outfits and mounts that move while standing still (breathing, flapping wings) can be drawn frame by frame. Before, step 0 was always the first phase.
+- `Looktype::idlePhases()` is how many phases a looktype cycles through while standing, 1 when it stands still: the idle frame group's phases from 10.57 on, otherwise all phases for looktypes with the `animate_always` flag.
+- `Looktype::idleDurations()` gives each of those phases in milliseconds: the `.dat` durations from 10.50 on (the average of min and max), otherwise a second per cycle, as OTClient draws `animate_always` creatures.
+
 ## [4264b0f] Support every client version with Tibia.dat and Tibia.spr (2026-10-10)
 
 ### Added

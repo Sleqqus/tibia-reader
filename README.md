@@ -63,6 +63,11 @@ $outfit->setMount(726)->setColors(123, 123, 123, 123);
 $image = $outfit->getFrame();        // single frame
 $frameMap = $outfit->getFrameMap();  // all directions x animation steps
 
+// Standing animation (breathing, flapping wings): 1 phase when the looktype stands still
+$outfit->idlePhases();               // e.g. 8
+$outfit->idleDurations();            // milliseconds per phase, e.g. [100, 100, ...]
+$outfit->setStep(0)->setIdlePhase(3)->getFrame();
+
 header('Content-type: image/png');
 imagepng($image);
 ```

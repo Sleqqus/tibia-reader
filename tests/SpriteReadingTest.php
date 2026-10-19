@@ -126,6 +126,49 @@ final class SpriteReadingTest extends TestCase
 		$this->assertGreaterThan(0, self::countOpaquePixels($frame));
 	}
 
+	#[DataProviderExternal(ClientFiles::class, 'versions')]
+	public function testCitizenStandsStill(int|string $key): void
+	{
+		$citizen = ClientFiles::client($key)->looktype(self::CITIZEN_OUTFIT);
+
+		$this->assertSame(1, $citizen->idlePhases());
+		$this->assertCount(1, $citizen->idleDurations());
+	}
+
+	#[DataProviderExternal(ClientFiles::class, 'versions')]
+	public function testIdlePhasesRender(int|string $key): void
+	{
+		$client = ClientFiles::client($key);
+		$dat = $client->dat();
+
+		// The first looktype that moves while standing still, if the version has one
+		for ($id = 1; $id <= $dat->fileLooktypes; $id++) {
+			$outfit = $client->looktype($id);
+			if ($outfit->idlePhases() > 1) {
+				break;
+			}
+		}
+		if ($outfit->idlePhases() < 2) {
+			$this->markTestSkipped("{$key} has no looktype that moves while standing still");
+		}
+
+		$durations = $outfit->idleDurations();
+		$this->assertCount($outfit->idlePhases(), $durations);
+		$this->assertGreaterThan(0, array_sum($durations));
+
+		$first = $outfit->setIdlePhase(0)->getFrame();
+		$last = $outfit->setIdlePhase($outfit->idlePhases() - 1)->getFrame();
+		$this->assertNotSame(self::pixels($first), self::pixels($last), "looktype {$id} changes while standing");
+	}
+
+	private static function pixels(GdImage $image): string
+	{
+		ob_start();
+		imagepng($image);
+
+		return (string) ob_get_clean();
+	}
+
 	private static function countOpaquePixels(GdImage $image): int
 	{
 		$transparent = imagecolortransparent($image);
